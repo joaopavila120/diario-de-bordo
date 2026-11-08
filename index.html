@@ -1,0 +1,1530 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Diário e checklist das máquinas da fazenda, com QR code, revisões pelo horímetro e funcionamento sem internet.">
+<meta name="theme-color" content="#1F5F2A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Diário de Bordo">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Diário de Bordo das Máquinas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: uma tela por vez. Operador = celular centralizado; Dono = painel */
+:root{
+  --paper:#EEF2EC; --surface:#FFFFFF; --sunk:#E3E9E0; --ink:#152016; --ink-2:#56625A; --line:#D3DBCF;
+  --brand:#1F5F2A; --brand-ink:#FFFFFF;
+  --accent:#2E7D32; --accent-ink:#FFFFFF; --accent-soft:#E2EFE3; --accent-text:#256B2A;
+  --gold:#FFC20E; --gold-ink:#1E1600; --on-warn:#1E1600;
+  --ok:#2E8B3E; --ok-soft:#DDF0E0; --warn:#8A5A00; --warn-fill:#F5B400; --warn-soft:#FFF1C9;
+  --bad:#D32F2F; --bad-soft:#FBE2E0; --na:#6B7568; --na-soft:#E3E8E1;
+  --gauge:#152016; --gauge-ink:#EEF2EC; --bezel:#152016;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --f-app:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:12px; --shadow:0 1px 2px rgba(21,32,22,.07),0 4px 14px rgba(21,32,22,.08);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1310; --surface:#18201A; --sunk:#222C24; --ink:#E8EFE6; --ink-2:#9CA99B; --line:#2C392E;
+  --brand:#1B4D24; --brand-ink:#FFFFFF;
+  --accent:#2E7D32; --accent-ink:#FFFFFF; --accent-soft:#1A3A20; --accent-text:#7CC47F;
+  --gold:#FFC20E; --gold-ink:#1E1600; --on-warn:#1E1600;
+  --ok:#3E9B4F; --ok-soft:#14321C; --warn:#F5B400; --warn-fill:#F5B400; --warn-soft:#332709;
+  --bad:#E5483B; --bad-soft:#3B1613; --na:#6F7B70; --na-soft:#253027;
+  --gauge:#050805; --gauge-ink:#EEF2EC; --bezel:#050805;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1310; --surface:#18201A; --sunk:#222C24; --ink:#E8EFE6; --ink-2:#9CA99B; --line:#2C392E;
+  --brand:#1B4D24; --brand-ink:#FFFFFF;
+  --accent:#2E7D32; --accent-ink:#FFFFFF; --accent-soft:#1A3A20; --accent-text:#7CC47F;
+  --gold:#FFC20E; --gold-ink:#1E1600; --on-warn:#1E1600;
+  --ok:#3E9B4F; --ok-soft:#14321C; --warn:#F5B400; --warn-fill:#F5B400; --warn-soft:#332709;
+  --bad:#E5483B; --bad-soft:#3B1613; --na:#6F7B70; --na-soft:#253027;
+  --gauge:#050805; --gauge-ink:#EEF2EC; --bezel:#050805;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--paper)}
+body{color:var(--ink);font-family:var(--f-app);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-app);font-stretch:100%;margin:0;line-height:1.1;text-wrap:balance}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.label{font-family:var(--f-app);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.ico{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* topo */
+.topbar{background:var(--surface);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand-mark{width:32px;height:32px;border-radius:9px;background:var(--accent);color:var(--gold);display:grid;place-items:center}
+.brand h1{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.stage[data-view="panel"]{max-width:1320px}
+.tabs{display:inline-flex;background:var(--sunk);border-radius:999px;padding:3px;gap:2px}
+.tabs button{border:0;background:transparent;padding:8px 18px;border-radius:999px;font-weight:650;color:var(--ink-2)}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+/* palco */
+.stage{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;max-width:1100px;margin:0 auto}
+.stage[data-view="op"] .panel,.stage[data-view="panel"] .phone-wrap{display:none}
+.phone-wrap{display:flex;justify-content:center}
+.phone{width:100%;max-width:400px}
+.op{background:var(--paper);min-height:520px;border-radius:var(--r);overflow:hidden;overflow:clip}
+@media (min-width:700px){
+  .phone{background:var(--bezel);border-radius:42px;padding:11px;box-shadow:0 18px 50px rgba(10,15,25,.25)}
+  .op{height:min(760px,calc(100vh - 120px));overflow-y:auto;border-radius:31px;scrollbar-width:thin}
+}
+
+/* comuns */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);
+  border-radius:10px;padding:10px 14px;font-weight:650;font-size:14.5px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent-text);color:var(--accent-ink)}
+.btn.big{padding:16px;font-size:17px;width:100%;border-radius:var(--r)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--accent-text);padding-inline:4px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;background:var(--na-soft);color:var(--na)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.bad{background:var(--bad-soft);color:var(--bad)}
+.c-ok{color:var(--ok)} .c-warn{color:var(--warn)} .c-bad{color:var(--bad)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.tico{width:44px;height:44px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;flex:none}
+.tico svg{width:30px;height:30px;stroke-width:1.8}
+.sev{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+.sev svg{width:17px;height:17px;stroke-width:3}
+.sev.ok{background:var(--ok-soft);color:var(--ok)} .sev.warn{background:var(--warn-fill);color:#2A1C00} .sev.bad{background:var(--bad);color:#fff} .sev.na{background:var(--na-soft);color:var(--na)}
+.bar{height:8px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--ok)}
+.bar.warn i{background:var(--warn-fill)} .bar.bad i{background:var(--bad)}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:13px;font-weight:650;color:var(--ink-2)}
+.field input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+
+/* mostrador do horímetro */
+.gauge{display:inline-flex;align-items:stretch;gap:3px;background:var(--gauge);padding:6px;border-radius:8px}
+.gauge b{font-family:var(--f-mono);font-weight:600;font-size:26px;line-height:1;color:var(--gauge-ink);background:linear-gradient(#2A3644,#1A222C 48%,#10161D 52%,#222C38);width:1.05em;padding:6px 0;text-align:center;border-radius:3px}
+.gauge b.sep{background:none;width:.35em;color:#8D99A8}
+.gauge .u{font-family:var(--f-display);font-stretch:80%;font-weight:700;color:var(--warn-fill);align-self:flex-end;padding:0 4px 4px 6px;font-size:15px}
+</style>
+
+</head>
+<body>
+<style>
+/* celular do operador: padrão de apps de inspeção (cartões brancos, lista agrupada, barra inferior) */
+.op{font-family:var(--f-app);font-size:15px}
+.op h1,.op h2,.op h3{font-family:var(--f-app);font-stretch:100%}
+.op .mono{font-family:var(--f-app);font-variant-numeric:tabular-nums}
+.o-wrap{min-height:100%;display:flex;flex-direction:column}
+@media (max-width:699px){.o-wrap{min-height:calc(100vh - 110px)}}
+.o-screen{flex:1;display:flex;flex-direction:column}
+.o-top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;display:flex;align-items:center;gap:6px;min-height:58px;padding:6px 12px 6px 6px;background:var(--surface);border-bottom:1px solid var(--line)}
+.o-top h2{flex:1;min-width:0;font-size:17px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.o-top h2 small{display:block;font-size:12.5px;font-weight:500;color:var(--ink-2)}
+.o-icon{border:0;background:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--ink);flex:none}
+.o-icon:hover{background:var(--sunk)}
+.o-gap{width:10px;flex:none}
+.o-count{font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.o-progress{height:4px;background:var(--sunk)}
+.o-progress i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.o-sig{border:0;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;padding:6px 11px;border-radius:99px;background:var(--ok-soft);color:var(--ok);flex:none}
+.o-sig i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.o-sig.off{background:var(--bad-soft);color:var(--bad)}
+.o-hello{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:24px 18px 4px}
+.o-hello p{margin:0 0 2px;color:var(--ink-2);font-size:13.5px;font-weight:500}
+.o-hello p::first-letter{text-transform:uppercase}
+.o-hello h2{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.o-hello-r{display:flex;align-items:center;gap:8px}
+.o-me{width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-weight:700;font-size:17px;flex:none}
+.o-body{padding:14px 16px 22px;display:flex;flex-direction:column;gap:12px}
+.o-card{background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.o-scan{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;border-radius:18px;padding:18px;background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 28%,transparent)}
+.o-scan-ico{width:54px;height:54px;border-radius:14px;background:rgba(255,255,255,.18);display:grid;place-items:center;flex:none}
+.o-scan-ico .ico{width:30px;height:30px}
+.o-scan b{display:block;font-size:17px;font-weight:700}
+.o-scan .o-txt small{display:block;font-size:13px;color:inherit;opacity:.85}
+.o-txt{flex:1;min-width:0}
+.o-txt b{display:block;font-size:15px;font-weight:650;line-height:1.3}
+.o-txt small{display:block;font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.o-txt small.c-warn{color:var(--warn)} .o-txt small.c-bad{color:var(--bad)}
+.o-sec{display:flex;align-items:baseline;justify-content:space-between;padding:10px 4px 0}
+.o-sec h3{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+.o-sec span{font-size:13px;color:var(--ink-2);font-weight:600}
+.o-group{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.o-cell{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:none;padding:12px 14px;position:relative}
+.o-cell + .o-cell::before,.o-tip + .o-tip::before{content:"";position:absolute;top:0;left:66px;right:0;height:1px;background:var(--line)}
+button.o-cell:hover{background:var(--sunk)}
+.o-cell > .ico{color:var(--ink-2);width:18px;height:18px}
+.o-av{width:42px;height:42px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.o-av svg{width:24px;height:24px;stroke-width:1.9}
+.o-av.sm{width:36px;height:36px;border-radius:10px} .o-av.sm svg{width:19px;height:19px}
+.o-av.lg{width:56px;height:56px;border-radius:15px} .o-av.lg svg{width:34px;height:34px}
+.o-av.ok{background:var(--ok-soft);color:var(--ok)} .o-av.warn{background:var(--warn-soft);color:var(--warn)} .o-av.bad{background:var(--bad-soft);color:var(--bad)}
+.o-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:650;padding:4px 10px;border-radius:99px;background:var(--na-soft);color:var(--na);white-space:nowrap;flex:none}
+.o-badge .ico{width:14px;height:14px}
+.o-badge.ok{background:var(--ok-soft);color:var(--ok)} .o-badge.warn{background:var(--warn-soft);color:var(--warn)} .o-badge.bad{background:var(--bad-soft);color:var(--bad)} .o-badge.q{background:var(--accent-soft);color:var(--accent-text)}
+.o-queue{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-text);font-weight:600;font-size:14px}
+.o-mach{padding:16px;display:flex;flex-direction:column;gap:14px}
+.o-mach-h{display:flex;align-items:center;gap:12px}
+.o-mach-h .o-txt b{font-size:18px;font-weight:700}
+.o-stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);padding-top:12px}
+.o-stats div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.o-stats div + div{border-left:1px solid var(--line);padding-left:14px}
+.o-stats small{font-size:12.5px;color:var(--ink-2);font-weight:500}
+.o-stats b{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.o-rev{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.o-rev-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.o-rev-h small{font-size:12.5px;color:var(--ink-2);font-weight:600}
+.o-rev > small{font-size:13px;font-weight:600}
+.o-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:15px 16px;font-weight:700;font-size:16px;position:relative}
+.o-btn.primary{background:var(--accent);color:var(--accent-ink)}
+.o-btn.ok{background:var(--ok-soft);color:var(--ok)}
+.o-btn.sec{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.o-btn.sm{width:auto;padding:9px 12px;font-size:14px;border-radius:10px}
+.o-btn[disabled]{opacity:.45;cursor:not-allowed}
+.o-btn input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.o-hm{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.o-hm label{font-size:13px;font-weight:650;color:var(--ink-2)}
+.o-hm-in{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;padding:2px 14px;background:var(--paper)}
+.o-hm-in:focus-within{border-color:var(--accent-text)}
+.o-hm-in input{flex:1;min-width:0;border:0;background:none;font-size:24px;font-weight:700;padding:9px 0;outline:none;font-variant-numeric:tabular-nums}
+.o-hm-in span{font-weight:700;color:var(--ink-2)}
+.o-hm small{font-size:12.5px;color:var(--ink-2)}
+.o-q{padding:14px;display:flex;flex-direction:column;gap:12px;border-width:1.5px}
+.o-q p{margin:0;font-weight:600;font-size:15px;line-height:1.35}
+.o-q[data-s="warn"]{border-color:var(--warn-fill)} .o-q[data-s="bad"]{border-color:var(--bad)}
+.o-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.o-seg button{display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 4px;font-weight:650;font-size:13.5px;color:var(--ink-2)}
+.o-seg button .ico{width:16px;height:16px;stroke-width:2.6}
+.o-seg button[data-v="ok"][aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.o-seg button[data-v="warn"][aria-pressed="true"]{background:var(--warn-fill);border-color:var(--warn-fill);color:#2A1C00}
+.o-seg button[data-v="bad"][aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#fff}
+.o-seg button[data-v="na"][aria-pressed="true"]{background:var(--na);border-color:var(--na);color:#fff}
+.o-extra{display:flex;flex-direction:column;gap:8px}
+.o-extra textarea{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper);resize:vertical;width:100%}
+.o-photo{display:flex;align-items:center;gap:10px}
+.o-photo img{width:52px;height:52px;object-fit:cover;border-radius:10px}
+.o-foot{position:sticky;bottom:0;z-index:5;margin-top:auto;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line)}
+.o-done{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:18px 0 6px}
+.o-done-ico{width:80px;height:80px;border-radius:50%;display:grid;place-items:center}
+.o-done-ico svg{width:40px;height:40px;stroke-width:2.6}
+.o-done-ico.ok{background:var(--ok);color:#fff} .o-done-ico.warn{background:var(--warn-fill);color:#2A1C00} .o-done-ico.bad{background:var(--bad);color:#fff}
+.o-done h2{font-size:22px;font-weight:800}
+.o-done small{color:var(--ink-2);font-size:13px}
+.o-kv{padding:2px 16px}
+.o-kv div{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:14.5px}
+.o-kv div:first-child{border-top:0}
+.o-kv span{color:var(--ink-2)}
+.o-empty{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:56px 20px;color:var(--ink-2)}
+.o-empty > span{width:64px;height:64px;border-radius:50%;background:var(--sunk);display:grid;place-items:center;margin-bottom:6px}
+.o-empty > span .ico{width:28px;height:28px}
+.o-empty b{color:var(--ink);font-size:16px}
+.o-tip{padding:14px 16px;display:flex;gap:12px;position:relative}
+.o-tip .n{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.o-tip b{display:block;margin-bottom:2px}
+.o-tip p{margin:0;font-size:14px;color:var(--ink-2)}
+.o-calc{padding:14px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.o-calc .field input{background:var(--paper)}
+.o-calc .res{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;background:var(--accent-soft);color:var(--accent-text);border-radius:12px;padding:12px 14px;font-weight:600}
+.o-calc .res b{font-size:26px;font-variant-numeric:tabular-nums}
+.o-hist{padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.o-hist-h{display:flex;justify-content:space-between;gap:10px}
+.o-hist p{margin:0;font-size:14px}
+.o-nav{position:sticky;bottom:0;z-index:6;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:4px 28px calc(8px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line)}
+.o-nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:650;color:var(--ink-2);padding:6px}
+.o-nav button[aria-current="true"]{color:var(--accent-text)}
+.o-nav .o-fab{width:58px;height:58px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;margin-top:-28px;padding:0;box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
+.o-nav .o-fab .ico{width:26px;height:26px}
+.scanner{aspect-ratio:1/1;max-width:100%;border-radius:18px;background:radial-gradient(circle at 50% 40%,#2B3a4a,#0B1016);position:relative;overflow:hidden;display:grid;place-items:center}
+.scanner .frame{width:60%;aspect-ratio:1/1;position:relative}
+.scanner .frame i{position:absolute;width:28%;height:28%;border:4px solid #FFFFFF}
+.scanner .frame i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0;border-radius:12px 0 0 0}
+.scanner .frame i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0;border-radius:0 12px 0 0}
+.scanner .frame i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 12px}
+.scanner .frame i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 12px 0}
+.scanner .laser{position:absolute;left:10%;right:10%;height:2px;background:#F2B10C;box-shadow:0 0 12px #F2B10C;animation:scan 2.2s ease-in-out infinite}
+@keyframes scan{0%,100%{top:14%}50%{top:84%}}
+.o-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.o-tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px;border-radius:16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-height:126px}
+.o-tile b{font-size:17px;font-weight:750;margin-top:auto}
+.o-tile small{font-size:12.5px;color:var(--ink-2);line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.o-tile-ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--accent);color:#FFFFFF}
+.o-tile.primary{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
+.o-tile.done{background:var(--ok);border-color:var(--ok);color:#FFFFFF}
+.o-tile.primary small,.o-tile.done small{color:rgba(255,255,255,.88)}
+.o-tile.primary .o-tile-ico,.o-tile.done .o-tile-ico{background:rgba(255,255,255,.2)}
+/* usados também nas folhas (modais) */
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);text-align:left;width:100%}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:15px}
+.row .t small{display:block;font-size:13px;color:var(--ink-2)}
+.err{color:var(--bad);font-size:13.5px;font-weight:650}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px;margin:0}
+.kv dt{color:var(--ink-2)} .kv dd{margin:0;font-family:var(--f-mono);font-size:12.5px;overflow-wrap:anywhere}
+
+/* painel do dono: padrão de sistemas de gestão de frota (menu lateral, indicadores, tabelas) */
+.panel{font-family:var(--f-app);font-size:14.5px}
+.panel h2,.panel h3{font-family:var(--f-app);font-stretch:100%}
+.panel .mono{font-family:var(--f-app);font-variant-numeric:tabular-nums}
+.pd{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (min-width:900px){.pd{grid-template-columns:210px minmax(0,1fr);align-items:start}}
+.pd-side{display:flex;flex-direction:column;gap:6px;min-width:0}
+@media (min-width:900px){.pd-side{position:sticky;top:20px}}
+.pd-nav{display:flex;flex-direction:column;gap:2px}
+.pd-nav button{display:flex;align-items:center;gap:10px;border:0;background:none;padding:10px 12px;border-radius:10px;font-weight:600;color:var(--ink-2);text-align:left;width:100%}
+.pd-nav button:hover{background:var(--sunk);color:var(--ink)}
+.pd-nav button[aria-current="true"]{background:var(--surface);color:var(--accent-text);box-shadow:var(--shadow)}
+.pd-nav .n{margin-left:auto;font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;background:var(--sunk);color:var(--ink-2)}
+.pd-nav .n.warn{background:var(--warn-soft);color:var(--warn)} .pd-nav .n.bad{background:var(--bad-soft);color:var(--bad)}
+.pd-reset{border:0;background:none;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:8px 12px;text-align:left}
+.pd-reset:hover{color:var(--ink)}
+@media (max-width:899px){
+  .pd-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:2px;scrollbar-width:none}
+  .pd-nav button{width:auto;white-space:nowrap;flex:none;background:var(--surface);border:1px solid var(--line)}
+  .pd-nav button[aria-current="true"]{border-color:var(--accent-text);box-shadow:none}
+  .pd-side .pd-reset{display:none}
+}
+.pd-main{display:flex;flex-direction:column;gap:18px;min-width:0}
+.pd-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pd-head h2{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.pd-head p{margin:2px 0 0;color:var(--ink-2)}
+.pd-head p::first-letter{text-transform:uppercase}
+.pd-title{display:flex;align-items:center;gap:14px;min-width:0}
+.pd-crumb{border:0;background:none;color:var(--ink-2);font-weight:600;display:inline-flex;align-items:center;gap:4px;padding:0;font-size:13.5px;align-self:flex-start}
+.pd-crumb:hover{color:var(--accent-text)}
+.pd-crumb .ico{width:16px;height:16px}
+.pd-acts{display:flex;gap:8px;flex-wrap:wrap}
+.pd-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 14px;font-weight:650;font-size:14px;white-space:nowrap}
+.pd-btn:hover{border-color:var(--ink-2)}
+.pd-btn.primary{background:var(--accent);border-color:var(--accent-text);color:var(--accent-ink)}
+.pd-btn.sm{padding:6px 10px;font-size:13px}
+.pd-btn .ico{width:18px;height:18px}
+.pd-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;min-width:0}
+.pd-card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.pd-card-h h3{font-size:16px;font-weight:700}
+.pd-link{border:0;background:none;color:var(--accent-text);font-weight:650;font-size:13.5px;padding:0}
+.pd-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:1150px){.pd-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pd-kpi{padding:16px;display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%}
+button.pd-kpi:hover{border-color:var(--accent-text)}
+.pd-kpi-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent-text)}
+.pd-kpi-ico.ok{background:var(--ok-soft);color:var(--ok)} .pd-kpi-ico.warn{background:var(--warn-soft);color:var(--warn)} .pd-kpi-ico.bad{background:var(--bad-soft);color:var(--bad)}
+.pd-kpi small{display:block;color:var(--ink-2);font-weight:600;font-size:13px}
+.pd-kpi b{display:block;font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums}
+.pd-kpi b span{font-size:16px;color:var(--ink-2);font-weight:700}
+.pd-kpi em{display:block;font-style:normal;font-size:12.5px;color:var(--ink-2)}
+@media (max-width:520px){.pd-kpi{padding:12px;gap:10px}.pd-kpi-ico{width:34px;height:34px}.pd-kpi b{font-size:24px}}
+.pd-two{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+@media (min-width:1250px){.pd-two{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
+.pd-r{display:flex;align-items:center;gap:12px;padding:12px 18px;border:0;border-top:1px solid var(--line);background:none;text-align:left;width:100%}
+.pd-r:first-child{border-top:0}
+button.pd-r:hover{background:var(--sunk)}
+.pd-r > .ico{color:var(--ink-2);width:18px;height:18px}
+.pd-empty{padding:30px 18px;text-align:center;color:var(--ink-2);display:flex;flex-direction:column;gap:4px;align-items:center}
+.pd-empty b{color:var(--ink)}
+/* tabelas responsivas */
+.pd-th,.pd-tr{display:grid;align-items:center;gap:14px;padding:12px 18px}
+.pd-th{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--line);padding-block:10px}
+.pd-tr{border:0;border-top:1px solid var(--line);background:none;text-align:left;width:100%}
+.pd-th + .pd-tr{border-top:0}
+button.pd-tr:hover{background:var(--sunk)}
+.pd-tr > *{min-width:0}
+.pd-tr > .ico{color:var(--ink-2);width:18px;height:18px}
+.pd-name{display:flex;align-items:center;gap:12px;min-width:0}
+.c-rev{display:flex;flex-direction:column;gap:5px;font-size:13px}
+.c-rev > span:first-child{display:flex;justify-content:space-between;gap:8px}
+.c-rev > span:first-child span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-m{grid-template-columns:minmax(0,2fr) minmax(0,.9fr) minmax(0,.9fr) minmax(0,1.7fr) 18px}
+.g-c{grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(0,.9fr) minmax(0,.9fr)}
+.g-s{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto}
+.r{text-align:right}
+@media (max-width:760px){
+  .pd-th{display:none}
+  .g-m{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+  .g-m .c-hm,.g-m > .ico{display:none}
+  .g-m .c-rev{grid-column:1/-1}
+  .g-c{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+  .g-c .c-tpl,.g-c .c-hm{display:none}
+  .g-s{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+  .g-s .c-due{display:none}
+  .g-s .c-act{grid-column:1/-1}
+}
+.pd-filter{display:inline-flex;background:var(--sunk);border-radius:99px;padding:3px;gap:2px}
+.pd-filter button{border:0;background:none;padding:6px 12px;border-radius:99px;font-weight:650;font-size:13px;color:var(--ink-2)}
+.pd-filter button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.pd-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.pd-stats div{padding:14px 18px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pd-stats div + div{border-left:1px solid var(--line)}
+.pd-stats small{color:var(--ink-2);font-weight:600;font-size:12.5px}
+.pd-stats b{font-size:18px;font-weight:750;font-variant-numeric:tabular-nums}
+@media (max-width:700px){.pd-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.pd-stats div:nth-child(3){border-left:0}.pd-stats div:nth-child(n+3){border-top:1px solid var(--line)}}
+.pd-detail{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+@media (min-width:1250px){.pd-detail{grid-template-columns:minmax(0,1fr) 270px;align-items:start}}
+.pd-col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.pd-plan{display:flex;flex-direction:column}
+.pd-plan > div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 18px;border-top:1px solid var(--line)}
+.pd-plan > div:first-child{border-top:0}
+.pd-plan .bar{grid-column:1/-1}
+.pd-plan small{color:var(--ink-2);font-size:12.5px}
+.pd-pad{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.pd-items{display:flex;flex-direction:column;padding-bottom:4px}
+.pd-grp{padding:12px 18px 4px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.pd-item{display:flex;align-items:center;gap:12px;padding:9px 18px}
+.pd-item + .pd-item{border-top:1px solid var(--line)}
+.pd-item .sev{width:26px;height:26px;border-radius:7px}
+.pd-item .sev svg{width:15px;height:15px}
+.sev.none{background:var(--sunk);color:var(--ink-2);font-weight:700}
+.pd-rm{border:0;background:none;color:var(--ink-2);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none}
+.pd-rm:hover{background:var(--sunk);color:var(--bad)}
+.pd-rm .ico{width:16px;height:16px}
+.pd-more summary{padding:12px 18px;cursor:pointer;font-weight:650;color:var(--accent-text);list-style:none}
+.pd-more summary::-webkit-details-marker{display:none}
+.pd-more summary::before{content:"+ "}
+.pd-more[open] summary::before{content:"– "}
+.pd-more[open] summary{border-bottom:1px solid var(--line)}
+.pd-pair{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+@media (min-width:1100px){.pd-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.box{padding:16px;display:flex;flex-direction:column;gap:12px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:700;padding:10px 18px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.sticker{background:#FFFFFF;color:#111111;border:3px solid #111111;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.sticker .band{align-self:stretch;background:#1D6B35;color:#FFFFFF;font-family:var(--f-app);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px;border-radius:5px}
+.sticker svg{width:100%;max-width:190px;height:auto;display:block}
+.sticker strong{font-family:var(--f-app);font-size:19px;font-weight:800;line-height:1.1}
+.sticker .id{font-family:var(--f-mono);font-weight:600;font-size:13px}
+
+.pd-pad .pd-btn{justify-content:center}
+@media (min-width:900px){.pd-main > .pd-reset{display:none}}
+.pd-main > .pd-reset{align-self:center}
+/* folha e aviso */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(8,12,18,.5);display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:700px){.sheet{align-items:center;padding:24px}}
+.sheet-in{font-family:var(--f-app);background:var(--paper);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0}
+@media (min-width:700px){.sheet-in{border-radius:16px}}
+.sheet-head{position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.sheet-head h3{flex:1;font-size:18px;font-weight:750}
+.sheet-head .x{border:0;background:var(--sunk);width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.sheet-body{padding:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.form-grid{grid-template-columns:1fr}}
+.svc{display:flex;flex-direction:column;gap:6px}
+.svc label{display:flex;gap:10px;align-items:center;padding:11px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:14.5px;font-weight:600}
+.svc input{width:20px;height:20px;accent-color:var(--accent-text)}
+.svc label small{margin-left:auto;font-size:12.5px;font-weight:650;white-space:nowrap}
+.types{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.type-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;font-weight:650;font-size:13px}
+.type-btn .tico{background:transparent}
+.type-btn[aria-pressed="true"]{border-color:var(--accent-text);background:var(--accent-soft);color:var(--accent-text)}
+.pe{display:flex;flex-direction:column;gap:6px}
+.pe div{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:14.5px;font-weight:600}
+.pe div span{flex:1;min-width:0}
+.pe input{width:90px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-family:var(--f-mono);text-align:right;background:var(--surface)}
+.pe small{color:var(--ink-2);font-weight:600;width:22px}
+.pe .tag{display:inline-block;width:auto;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent-text);margin-left:6px}
+.pe .rm{border:0;background:none;color:var(--ink-2);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+.pe .rm:hover{background:var(--sunk)}
+.pe .rm .ico{width:16px;height:16px}
+.add-row{border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:11px;font-weight:650;color:var(--accent-text);display:flex;gap:8px;align-items:center;justify-content:center;width:100%}
+.add-row:hover{border-color:var(--accent-text)}
+.flabel{font-size:13px;font-weight:650;color:var(--ink-2)}
+.kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.kinds label{position:relative}
+.kinds input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0}
+.kinds span{display:block;text-align:center;padding:10px 6px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-weight:650;font-size:14px}
+.kinds input:checked + span{border-color:var(--accent-text);background:var(--accent-soft);color:var(--accent-text)}
+.kinds input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
+.svc-row{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.svc .svc-row label{border:0;background:none}
+.svc .val{display:flex;align-items:center;gap:8px;padding:0 12px 10px 42px}
+.svc .val input{flex:1;min-width:0;width:auto;height:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);font-family:var(--f-mono)}
+.svc .val span{font-weight:650;color:var(--ink-2)}
+.created{width:100%;max-width:250px;margin:0 auto}
+.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.linkbox{width:100%;font-family:var(--f-mono);font-size:12.5px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--gauge);color:var(--gauge-ink);padding:10px 18px;border-radius:999px;font-weight:650;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:calc(100% - 32px);text-align:center}
+
+/* ===== cores sólidas: blocos chapados de verde e amarelo ===== */
+.topbar{background:var(--brand);border-bottom:0;color:var(--brand-ink)}
+.brand h1{color:#FFFFFF}
+.brand-mark{background:var(--gold);color:var(--gold-ink)}
+.tabs{background:rgba(0,0,0,.22)}
+.tabs button{color:rgba(255,255,255,.85)}
+.tabs button[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink);box-shadow:none}
+.chip{background:var(--sunk);color:var(--ink)}
+.chip.ok{background:var(--ok);color:#FFFFFF} .chip.warn{background:var(--warn-fill);color:var(--on-warn)} .chip.bad{background:var(--bad);color:#FFFFFF}
+.sev.ok{background:var(--ok);color:#FFFFFF} .sev.warn{background:var(--warn-fill);color:var(--on-warn)} .sev.bad{background:var(--bad);color:#FFFFFF} .sev.na{background:var(--na);color:#FFFFFF}
+.o-badge{background:var(--na);color:#FFFFFF}
+.o-badge.ok{background:var(--ok);color:#FFFFFF} .o-badge.warn{background:var(--warn-fill);color:var(--on-warn)} .o-badge.bad{background:var(--bad);color:#FFFFFF} .o-badge.q{background:var(--accent);color:#FFFFFF}
+.o-av{background:var(--accent);color:#FFFFFF}
+.o-av.ok{background:var(--ok);color:#FFFFFF} .o-av.warn{background:var(--warn-fill);color:var(--on-warn)} .o-av.bad{background:var(--bad);color:#FFFFFF}
+.o-top{background:var(--brand);color:#FFFFFF;border-bottom:0}
+.o-top h2 small{color:rgba(255,255,255,.78)}
+.o-icon{color:#FFFFFF} .o-icon:hover{background:rgba(255,255,255,.14)}
+.o-count{color:rgba(255,255,255,.9)}
+.o-progress{background:var(--brand)} .o-progress i{background:var(--gold)}
+.o-sig{background:rgba(255,255,255,.16);color:#FFFFFF}
+.o-sig.off{background:var(--bad);color:#FFFFFF}
+.o-hello{background:var(--brand);color:#FFFFFF;padding-bottom:66px}
+.o-hello p{color:rgba(255,255,255,.8)}
+.o-hello + .o-body{margin-top:-52px;position:relative}
+.o-scan{background:var(--gold);color:var(--gold-ink);box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.o-scan-ico{background:var(--gold-ink);color:var(--gold)}
+.o-queue{background:var(--accent);color:#FFFFFF}
+.o-btn.ok{background:var(--ok);color:#FFFFFF}
+.o-tip .n{background:var(--accent);color:#FFFFFF}
+.o-calc .res{background:var(--brand);color:#FFFFFF}
+.o-calc .res b{color:var(--gold)}
+.o-nav{background:var(--brand);border-top:0}
+.o-nav button{color:rgba(255,255,255,.72)}
+.o-nav button[aria-current="true"]{color:#FFFFFF}
+.o-nav .o-fab{background:var(--gold);color:var(--gold-ink);box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.pd-kpi-ico{background:var(--accent);color:#FFFFFF}
+.pd-kpi-ico.ok{background:var(--ok);color:#FFFFFF} .pd-kpi-ico.warn{background:var(--warn-fill);color:var(--on-warn)} .pd-kpi-ico.bad{background:var(--bad);color:#FFFFFF}
+.pd-btn.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
+.pd-filter button[aria-pressed="true"]{background:var(--brand);color:#FFFFFF}
+.pd-nav .n.warn{background:var(--warn-fill);color:var(--on-warn)} .pd-nav .n.bad{background:var(--bad);color:#FFFFFF}
+@media (min-width:900px){
+  .pd-side{background:var(--brand);border-radius:16px;padding:10px}
+  .pd-nav button{color:rgba(255,255,255,.85)}
+  .pd-nav button:hover{background:rgba(255,255,255,.1);color:#FFFFFF}
+  .pd-nav button[aria-current="true"]{background:var(--gold);color:var(--gold-ink);box-shadow:none}
+  .pd-nav .n{background:rgba(255,255,255,.2);color:#FFFFFF}
+  .pd-nav button[aria-current="true"] .n{background:rgba(0,0,0,.14);color:var(--gold-ink)}
+  .pd-side .pd-reset{color:rgba(255,255,255,.72)}
+  .pd-side .pd-reset:hover{color:#FFFFFF}
+}
+@media (max-width:899px){.pd-nav button[aria-current="true"]{background:var(--brand);border-color:var(--brand);color:#FFFFFF}}
+.sheet-head{background:var(--brand);color:#FFFFFF;border-bottom:0}
+.sheet-head .x{background:rgba(255,255,255,.16);color:#FFFFFF}
+.kinds input:checked + span{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
+.type-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
+.type-btn[aria-pressed="true"] .tico{color:#FFFFFF}
+.sticker .band{background:#1F5F2A;color:#FFFFFF}
+</style>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="13" r="8"/><path d="M12 13l4-4M12 5V3"/></svg></div>
+    <h1>Diário de Bordo</h1>
+  </div>
+  <div class="tabs" role="group" aria-label="Escolher tela">
+    <button type="button" id="tab-op" data-act="view" data-v="op" aria-pressed="true">Operador</button>
+    <button type="button" id="tab-panel" data-act="view" data-v="panel" aria-pressed="false">Dono</button>
+  </div>
+</header>
+
+<main class="stage" id="stage" data-view="op">
+  <div class="phone-wrap"><div class="phone"><div class="op" id="op" aria-live="polite"></div></div></div>
+  <section class="panel" id="panel" aria-label="Painel do dono"></section>
+</main>
+
+<div class="sheet" id="sheet" hidden><div class="sheet-in" id="sheet-in" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+"use strict";
+/* Endereço publicado deste protótipo: os QR codes apontam para ele + #id-da-maquina */
+const APP_URL = "https://joaopavila120.github.io/diario-de-bordo/";
+
+/* ---------------- ícones ---------------- */
+const I = {
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  warn:'<path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.5v.01"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  qr:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  wrench:'<path d="M14.5 6.5a4 4 0 0 0 5 5l-8.5 8.5a2.1 2.1 0 0 1-3-3z"/><path d="M14.5 6.5L17 4l3 3-2.5 2.5"/>',
+  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+  play:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5-5.5 3.5z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  cloudoff:'<path d="M3 3l18 18"/><path d="M8 7.5A6 6 0 0 1 18 11a4 4 0 0 1 2.5 6M17 19H7a4.5 4.5 0 0 1-1.5-8.7"/>',
+  cloudup:'<path d="M7 19a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 11a4 4 0 0 1 0 8"/><path d="M12 12v8M9 15l3-3 3 3"/>',
+  download:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14"/>',
+  chev:'<path d="M9 5l7 7-7 7"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  phone:'<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>',
+  home:'<path d="M3.5 10.5L12 4l8.5 6.5V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"/>',
+  grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  truck:'<path d="M2.5 6.5h11v9.5h-11z"/><path d="M13.5 10h4l3 3.2V16h-7"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/>',
+  clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.5h6V4M9 10h6M9 14h6M9 18h3"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  wifi:'<path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5v.01"/>',
+  wifioff:'<path d="M3 3l18 18"/><path d="M8.5 16a5 5 0 0 1 7 0M5.5 12.5a9.5 9.5 0 0 1 5-2.5M2.5 9a14 14 0 0 1 4-2.6M14.5 10.3a9.5 9.5 0 0 1 4 2.2M12 5a14 14 0 0 1 9.5 4"/><path d="M12 19.5v.01"/>'
+};
+const ico = (n, cls="ico") => `<svg viewBox="0 0 24 24" class="${cls}" aria-hidden="true">${I[n]}</svg>`;
+const TICO = {
+  emp:'<path d="M3 23V13h9l3 5h3v5"/><path d="M12 13V8H8"/><path d="M22 5v18h7"/><circle cx="7.5" cy="24.5" r="3"/><circle cx="16.5" cy="24.5" r="2.5"/>',
+  cam:'<path d="M2 8h17v14H2z"/><path d="M19 12h6l4.5 5v5H19"/><circle cx="8" cy="24.5" r="2.8"/><circle cx="23.5" cy="24.5" r="2.8"/>',
+  plt:'<path d="M2 9h28M16 9V4h-4"/><path d="M6 9v7l-2 4M12 9v7l-2 4M18 9v7l-2 4M24 9v7l-2 4"/><circle cx="5" cy="25" r="2"/><circle cx="11" cy="25" r="2"/><circle cx="17" cy="25" r="2"/><circle cx="23" cy="25" r="2"/>',
+  tra:'<path d="M5 20v-7h8V5h8l2 8h4v7"/><path d="M13 13h10"/><circle cx="9.5" cy="22" r="5.5"/><circle cx="25" cy="23.5" r="3.2"/>'
+};
+const tico = t => `<span class="tico" aria-hidden="true"><svg viewBox="0 0 32 32" class="ico">${TICO[t]}</svg></span>`;
+
+/* ---------------- tipos, checklists, dicas ---------------- */
+const TYPES = {
+  plt:{label:"Plantadeira", daily:"plt-d", oper:"plt-op"},
+  emp:{label:"Empilhadeira", daily:"motor-d", oper:"emp"},
+  cam:{label:"Caminhão", daily:"motor-d", oper:"cam"},
+  tra:{label:"Trator", daily:"motor-d", oper:"tra"}
+};
+
+const TEMPLATES = {
+  emp:{title:"Checklist pré-safra", mode:"tri", groups:[
+    ["Motor",[["oleo","Óleo do motor","Vareta entre MIN e MÁX, motor desligado há 5 min"],
+      ["agua","Água do radiador","Nível no reservatório de expansão, motor frio"],
+      ["radiador","Radiador","Colmeia limpa, sem palha nem pó de semente"],
+      ["correia","Correia do motor","Tensão e trincas"]]],
+    ["Elétrica",[["bateria","Nível da bateria","Água cobrindo as placas ou indicador verde"],
+      ["luzes","Luzes, giroflex e alarme de ré",""],["buzina","Buzina",""]]],
+    ["Hidráulico e torre",[["hid","Óleo hidráulico","Nível no visor do tanque"],
+      ["vaz","Vazamentos","Embaixo da máquina, cilindros e mangueiras"],
+      ["garfos","Garfos e correntes","Trincas, desgaste e lubrificação"]]],
+    ["Segurança",[["freio","Freio de serviço e de estacionamento",""],["direcao","Direção","Sem folga"],
+      ["pneus","Pneus","Cortes, desgaste e porcas"],["cinto","Cinto de segurança",""],
+      ["glp","Cilindro de GLP","Fixação, mangueira e cheiro de gás"]]]
+  ]},
+  cam:{title:"Checklist pré-safra", mode:"tri", groups:[
+    ["Antes de ligar",[["oleo","Óleo do motor","Vareta entre MIN e MÁX"],["agua","Água do radiador","Reservatório de expansão, motor frio"],
+      ["hid","Óleo hidráulico (basculante)","Nível no visor do tanque"],["diesel","Diesel e Arla 32","Nível dos dois tanques"],
+      ["pneus","Pneus","Calibragem e estado, inclusive estepe"],["vaz","Vazamentos","Óleo, diesel, água e ar"]]],
+    ["Com o motor ligado",[["pisca","Pisca e setas",""],["luzes","Faróis, lanternas e luz de freio",""],
+      ["ar","Freios e pressão de ar","Manômetro na faixa verde"],["painel","Painel sem luz de alerta",""],
+      ["limpador","Limpador e buzina",""]]],
+    ["Documentos e segurança",[["doc","Documento (CRLV) e tacógrafo",""],
+      ["kit","Extintor, triângulo, macaco e chave de roda",""],["carga","Lona e amarração da carga",""]]]
+  ]},
+  plt:{title:"Checklist pré-safra", mode:"tri", groups:[
+    ["Rodado",[["pneu","Pressão dos pneus","Conforme o manual, pneus frios"],["rolam","Rolamentos","Sem folga nem ruído nos cubos e nas linhas"]]],
+    ["Linhas de plantio",[["alinh","Alinhamento das linhas","Todas na mesma profundidade e andando retas"],
+      ["bucha","Embuchamento do plantógrafo","Sem folga; não pode chacoalhar nem andar em zigue-zague"],
+      ["corte","Discos de corte","Giram livres; com 10% de desgaste, reavaliar"],
+      ["duplo","Discos duplos e limpadores","Giram livres, limpadores ajustados"],
+      ["limit","Rodas limitadoras e compactadoras","Mesma regulagem em todas as linhas"]]],
+    ["Distribuição",[["calib","Calibração dos dosadores","Dose de adubo e sementes por metro conferida"],
+      ["vacuo","Vácuo","Leitura do vacuômetro dentro da faixa"],["corr","Correntes e engrenagens","Tensão e lubrificação"],
+      ["mang","Mangueiras e engates hidráulicos","Sem vazamento"],["monitor","Sensores e monitor de plantio","Todas as linhas aparecendo no monitor"]]],
+    ["Lubrificação",[["graxa","Graxeiras do dia","Pontos do manual, com a máquina quente"]]]
+  ]},
+  tra:{title:"Checklist pré-safra", mode:"tri", groups:[
+    ["Motor",[["oleo","Óleo do motor","Vareta entre MIN e MÁX"],["agua","Água do radiador","Reservatório, motor frio"],
+      ["radiador","Radiador e tela","Limpos, sem palha"],["arfiltro","Filtro de ar","Indicador de restrição no verde"],["diesel","Diesel","Nível e dreno do separador de água"]]],
+    ["Transmissão e hidráulico",[["hid","Óleo da transmissão / hidráulico","Nível no visor"],["vaz","Vazamentos",""],
+      ["engate","Engate de 3 pontos e barra de tração","Pinos e travas"]]],
+    ["Segurança",[["pneus","Pneus","Pressão e cortes"],["luzes","Luzes e piscas",""],["freio","Freios",""],["cabine","Cinto e extintor",""]]]
+  ]},
+  "motor-d":{title:"Diário", mode:"tri", groups:[
+    ["Níveis",[["oleo","Nível do óleo do motor"],["hid","Nível do óleo hidráulico"],["agua","Água do radiador"]]]
+  ]},
+  "plt-d":{title:"Diário", mode:"tri", groups:[
+    ["Antes de plantar",[["graxa","Graxeiras lubrificadas"],["mang","Mangueiras hidráulicas sem vazamento"],["discos","Discos girando livres"]]]
+  ]},
+  "plt-op":{title:"Checklist pré-safra", mode:"yn", groups:[
+    ["Preparação",[["manual","Manual lido (regulagens e manutenção)"],["quebra","Sem peças quebradas ou danificadas"],
+      ["lubr","Lubrificação completa, com a máquina quente"],["nivel","Semeadora nivelada no trator"],
+      ["hidtrator","Pressão hidráulica do trator compatível"],["pneus","Pressão dos pneus"]]],
+    ["Discos e linhas",[["corte","Discos de corte girando livres"],["duplos","Discos duplos girando livres"],["limp","Limpadores ajustados"],
+      ["limit","Rodas limitadoras iguais e livres"],["press","Rodas pressionadoras reguladas"],["facao","Facões na mesma profundidade"],
+      ["molas","Molas de carga iguais"],["rastro","Carga extra na linha do rastro do trator"],["alinh","Linhas alinhadas"],["bucha","Embuchamento do plantógrafo sem folga"],["rolam","Rolamentos sem folga ou ruído"]]],
+    ["Dosador de adubo",[["engren","Engrenagens iguais nos dois lados"],["rosca","Roscas sem fim do mesmo diâmetro"],
+      ["doseadubo","Dose de adubo regulada"],["amostraadubo","Amostra de adubo em todas as linhas"]]],
+    ["Dosador de semente",[["densidade","Densidade de semente regulada"],["amostrasem","Amostra de semente em todas as linhas"],
+      ["espdisco","Discos com a mesma espessura"],["furos","Furos do mesmo tamanho"],["nfuros","Mesmo número de furos"],
+      ["rolete","Rolete expulsor compatível"],["aneisl","Anéis lisos iguais"],["aneisr","Anéis rebaixados iguais"],
+      ["discoanel","Disco + anel na espessura do manual"]]],
+    ["Vácuo",[["vacuo","Vácuo conferido"],["bomba","Pressão da bomba de vácuo conferida"]]]
+  ]}
+};
+const CULTURAS = {soja:{l:"Soja",v:5},milho:{l:"Milho",v:4},trigo:{l:"Cereais de inverno",v:6}};
+
+const TIPS = {
+  emp:[["Garfos baixos","Desloque com os garfos a 15–20 cm do chão e a torre inclinada para trás."],
+    ["Respeite a plaqueta","Nunca passe da capacidade da plaqueta de carga. Big bag de semente alto desloca o centro de carga."],
+    ["Rampa","Carregado, a carga fica sempre do lado de cima da rampa. Vazio, garfos para baixo da rampa."],
+    ["Ao sair da máquina","Garfos no chão, freio de estacionamento puxado e chave fora do contato."],
+    ["Troca do GLP","Feche a válvula antes, use luvas e confira vazamento com água e sabão."],
+    ["Radiador da sementeira","Sopre a colmeia com ar no fim do turno. Pó de semente entope e o motor esquenta."]],
+  cam:[["Pneu frio","Calibre com o pneu frio. Pneu quente dá leitura maior e engana."],
+    ["Arla 32","Não deixe acabar: o motor entra em modo de proteção e perde potência."],
+    ["Dreno do ar","Drene os reservatórios de ar todo dia para tirar a água do sistema de freio."],
+    ["Descida","Use o freio motor nas descidas e poupe as lonas."],
+    ["Basculante","Só bascule com o caminhão nivelado e longe da rede elétrica."]],
+  plt:[["Velocidade","Milho até 4 km/h, soja até 5, cereais de inverno até 6. Mais rápido dá mais falhas e duplas."],
+    ["Disco de corte","Só corta a palha, não pode calar no solo. Com 10% de desgaste, reavalie."],
+    ["Disco duplo / haste","Reaperte os parafusos e confira a profundidade."],
+    ["Plantógrafo","Se chacoalhar ou andar em zigue-zague, confira o embuchamento."],
+    ["Roda limitadora","É o ajuste fino da profundidade. Com barro, regule para a semente não ficar rasa."],
+    ["Molas","Nenhuma mola trabalha no limite. Deixe folga."]],
+  tra:[["Aquecer","Deixe 3 a 5 min em marcha lenta antes de pedir carga do motor."],
+    ["Turbo","Antes de desligar, 2 a 3 min em marcha lenta para o turbo esfriar."],
+    ["Filtro de ar no plantio","Confira o indicador de restrição todo dia: poeira de plantio entope rápido."],
+    ["Patinagem","Em plantio direto, mire entre 8% e 12% de patinagem. Ajuste lastro e pressão dos pneus."],
+    ["Abastecimento","Nunca abasteça com o motor ligado."]]
+};
+const VIDEOS = {
+  emp:["Como ler a vareta de óleo","Limpeza do radiador com ar","Nível e água da bateria","Inspeção de garfos e correntes"],
+  cam:["Volta de inspeção em 3 minutos","Calibragem dos pneus","Dreno do sistema de ar","Nível do óleo hidráulico"],
+  plt:["Conferir embuchamento do plantógrafo","Regulagem da roda limitadora","Coleta de amostra por linha","Troca de disco alveolado"],
+  tra:["Checagem diária do motor","Indicador do filtro de ar","Engate de 3 pontos","Dreno do separador de água"]
+};
+const OPERATORS = ["Marcos","Luiz","Adair","Jonas","Renato","Paulo"];
+</script>
+<script>
+/* ---------------- frota de exemplo ---------------- */
+/* plan: [id, serviço, intervalo, avisar quando faltar, último feito em] · parts: [chave, rótulo, produto/peça usada] */
+const MACHINES = [
+  {id:"plt-01",type:"plt",name:"Plantadeira 01",place:"Lavoura · safra de soja",model:"Pneumática a vácuo · 15 linhas a 45 cm",ident:"Frota 301",unit:"h",base:612,perDay:11,op:"Jonas",
+   plan:[["graxa","Lubrificação geral (todas as graxeiras)",50,10,580],["corr","Correntes e engrenagens",100,15,560],["rolam","Rolamentos e discos (inspeção)",300,30,400],["caixa","Óleo da caixa de engrenagens",500,50,150],["disco","Diâmetro dos discos de corte",150,20,500,"num","mm","406"]],
+   parts:[["graxa","Graxa","Lubrax Lith EP 2"],["oleoCaixa","Óleo da caixa","Lubrax Gear 90"],["rolam","Rolamento dos discos","SKF 6205-2RS"]]},
+  {id:"emp-01",type:"emp",name:"Empilhadeira 01",place:"Sementeira (UBS)",model:"Hyster H50FT · GLP",ident:"Frota 101",unit:"h",base:4812,perDay:9,op:"Marcos",
+   plan:[["oleo","Óleo do motor e filtro",250,40,4600],["ar","Filtro de ar",500,50,4600],["hid","Óleo hidráulico e filtro",1000,80,4100],["trans","Óleo da transmissão",1000,80,4100],["arref","Líquido de arrefecimento",2000,100,3600]],
+   parts:[["oleoMotor","Óleo do motor","Lubrax Top Turbo 15W-40"],["oleoHid","Óleo hidráulico","Lubrax Hydra XP 68"],["fOleo","Filtro de óleo","Tecfil PSL 619"],["fAr","Filtro de ar","Tecfil ARL 4137"],["fHid","Filtro hidráulico","Mann HD 612"]]},
+  {id:"emp-02",type:"emp",name:"Empilhadeira 02",place:"Sementeira (UBS)",model:"Toyota 8FGU25 · GLP",ident:"Frota 102",unit:"h",base:7236,perDay:8,op:"Luiz",
+   plan:[["oleo","Óleo do motor e filtro",250,40,6970],["ar","Filtro de ar",500,50,6970],["hid","Óleo hidráulico e filtro",1000,80,6480],["trans","Óleo da transmissão",1000,80,6480],["arref","Líquido de arrefecimento",2000,100,5500]],
+   parts:[["oleoMotor","Óleo do motor","Mobil Delvac MX 15W-40"],["oleoHid","Óleo hidráulico","Mobil DTE 10 Excel 68"],["fOleo","Filtro de óleo","Toyota 15601-76009"],["fAr","Filtro de ar","Fleetguard AF25551"],["fHid","Filtro hidráulico","Toyota 67501-23320"]]},
+  {id:"cam-01",type:"cam",name:"Caminhão 01",place:"Transporte de grãos",model:"VW Constellation 24.280",ident:"Placa IYK4F21",unit:"km",base:186430,perDay:310,op:"Adair",
+   plan:[["oleo","Óleo do motor e filtros (óleo e diesel)",20000,2000,167800],["ar","Filtro de ar",40000,3000,160000],["cambio","Óleo do câmbio e diferencial",80000,5000,120000],["hid","Óleo hidráulico (basculante)",50000,4000,150200],["pneu","Calibragem e rodízio dos pneus",10000,1000,180000,"num","psi","100"]],
+   parts:[["oleoMotor","Óleo do motor","Shell Rimula R4 X 15W-40"],["oleoHid","Óleo hidráulico","Ipiranga Ipitur HST 68"],["fOleo","Filtro de óleo","Mann W 962"],["fDiesel","Filtro de diesel","Fleetguard FF5488"],["fAr","Filtro de ar","Mann C 25 860"]]},
+  {id:"cam-02",type:"cam",name:"Caminhão 02",place:"Transporte de insumos",model:"Mercedes-Benz Atego 2430",ident:"Placa IZB7C08",unit:"km",base:92115,perDay:180,op:"Renato",
+   plan:[["oleo","Óleo do motor e filtros (óleo e diesel)",20000,2000,80050],["ar","Filtro de ar",40000,3000,80050],["cambio","Óleo do câmbio e diferencial",80000,5000,40000],["hid","Óleo hidráulico (basculante)",50000,4000,60100]],
+   parts:[["oleoMotor","Óleo do motor","Lubrax Top Turbo 15W-40"],["oleoHid","Óleo hidráulico","Lubrax Hydra XP 68"],["fOleo","Filtro de óleo","Tecfil PSL 560"],["fDiesel","Filtro de diesel","Tecfil PEC 3029"],["fAr","Filtro de ar","Tecfil ARS 9800"]]},
+  {id:"tra-01",type:"tra",name:"Trator 01",place:"Lavoura · puxa a plantadeira",model:"John Deere 6155J",ident:"Frota 201",unit:"h",base:3912,perDay:11,op:"Paulo",
+   plan:[["oleo","Óleo do motor e filtro",500,50,3520],["comb","Filtros de combustível",500,50,3520],["ar","Filtro de ar (elemento primário)",1000,80,3020],["hid","Óleo da transmissão/hidráulico e filtro",1500,100,3020],["arref","Líquido de arrefecimento",3000,150,1500]],
+   parts:[["oleoMotor","Óleo do motor","John Deere Plus-50 II 15W-40"],["oleoHid","Óleo transmissão/hidráulico","John Deere Hy-Gard"],["fOleo","Filtro de óleo","RE504836"],["fDiesel","Filtro de diesel","RE533910"],["fAr","Filtro de ar","RE587793"]]}
+];
+MACHINES.forEach(m=>{ m.plan = m.plan.map(([id,label,every,warn,last,kind,unit,sample])=>({id,label,every,warn,last,kind:kind||"check",unit:unit||"",sample})); });
+const SEED_V = 5;
+const BASE_N = MACHINES.length;
+/* plano e peças padrão para um veículo novo cadastrado pelo dono */
+const DEFAULTS = {
+  emp:{perDay:8, plan:[["oleo","Óleo do motor e filtro",250],["ar","Filtro de ar",500],["hid","Óleo hidráulico e filtro",1000],["trans","Óleo da transmissão",1000],["arref","Líquido de arrefecimento",2000]],
+    parts:[["oleoMotor","Óleo do motor"],["oleoHid","Óleo hidráulico"],["fOleo","Filtro de óleo"],["fAr","Filtro de ar"],["fHid","Filtro hidráulico"]]},
+  cam:{perDay:250, plan:[["oleo","Óleo do motor e filtros",20000],["ar","Filtro de ar",40000],["cambio","Óleo do câmbio e diferencial",80000],["hid","Óleo hidráulico",50000]],
+    parts:[["oleoMotor","Óleo do motor"],["oleoHid","Óleo hidráulico"],["fOleo","Filtro de óleo"],["fDiesel","Filtro de diesel"],["fAr","Filtro de ar"]]},
+  plt:{perDay:10, plan:[["graxa","Lubrificação geral",50],["corr","Correntes e engrenagens",100],["rolam","Rolamentos e discos",300],["caixa","Óleo da caixa de engrenagens",500]],
+    parts:[["graxa","Graxa"],["oleoCaixa","Óleo da caixa"],["rolam","Rolamento"]]},
+  tra:{perDay:10, plan:[["oleo","Óleo do motor e filtro",500],["comb","Filtros de combustível",500],["ar","Filtro de ar",1000],["hid","Óleo da transmissão/hidráulico",1500],["arref","Líquido de arrefecimento",3000]],
+    parts:[["oleoMotor","Óleo do motor"],["oleoHid","Óleo transmissão/hidráulico"],["fOleo","Filtro de óleo"],["fDiesel","Filtro de diesel"],["fAr","Filtro de ar"]]}
+};
+MACHINES.forEach(m => m.basePlan = m.plan);
+function applyCustom(){
+  MACHINES.length = BASE_N;
+  MACHINES.forEach(m => m.plan = m.basePlan.concat((S.extraPlan || {})[m.id] || []));
+  (S.custom || []).forEach(m => MACHINES.push(m));
+}
+function addPlanItem(m, it){
+  const item = {id:"x" + Date.now().toString(36), label:it.label, every:it.every, warn:Math.max(1, Math.round(it.every * .15)), last:current(m, "server"), kind:it.kind, unit:it.unit};
+  if (m.custom) m.plan.push(item);
+  else { S.extraPlan = S.extraPlan || {}; (S.extraPlan[m.id] = S.extraPlan[m.id] || []).push(item); applyCustom(); }
+}
+const svcText = (m, r, s) => { const p = m.plan.find(x => x.id === s) || {label:s}, v = r.values && r.values[s]; return p.label + (v ? ": " + v : ""); };
+function nextNum(t){ return Math.max(0, ...MACHINES.filter(m => m.type === t).map(m => parseInt(m.id.split("-")[1], 10) || 0)) + 1; }
+
+/* ---------------- utilidades ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Math.round(n).toLocaleString("pt-BR");
+const pad = n => String(n).padStart(2,"0");
+const hhmm = iso => { const d = new Date(iso); return pad(d.getHours())+":"+pad(d.getMinutes()); };
+const ddmm = iso => { const d = new Date(iso); return pad(d.getDate())+"/"+pad(d.getMonth()+1); };
+const ddmmyy = iso => { const d = new Date(iso); return ddmm(iso)+"/"+String(d.getFullYear()).slice(2); };
+const sameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+const isToday = iso => sameDay(new Date(iso), new Date());
+const whenLabel = iso => { const d=new Date(iso), y=new Date(); y.setDate(y.getDate()-1);
+  return isToday(iso) ? "hoje "+hhmm(iso) : sameDay(d,y) ? "ontem "+hhmm(iso) : ddmm(iso)+" "+hhmm(iso); };
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const mach = id => MACHINES.find(m => m.id === id);
+const U = m => m.unit === "h" ? "h" : "km";
+const counterName = m => m.unit === "h" ? "Horímetro" : "Hodômetro";
+const dayAt = (offset,h,mi) => { const d = new Date(); d.setDate(d.getDate()+offset); d.setHours(h,mi,0,0); return d; };
+const todayAt = (h,mi,k) => { const d = dayAt(0,h,mi), now = new Date(); return d > now ? new Date(now - (k+1)*6*60000) : d; };
+const tplOf = (m, kind) => TEMPLATES[kind === "oper" ? TYPES[m.type].oper : TYPES[m.type].daily];
+const allItems = tpl => tpl.groups.flatMap(g => g[1]);
+const itemLabel = (tpl, id) => (allItems(tpl).find(i => i[0] === id) || [id,id])[1];
+/* itens que o dono adiciona: [id, nome, "", tipo (check|num|text), unidade] */
+const extraOf = (mid, kind) => ((S.extraItems || {})[mid] || {})[kind] || [];
+const groupsFor = (m, kind) => { const ex = extraOf(m.id, kind); return ex.length ? tplOf(m, kind).groups.concat([["Adicionados pelo dono", ex]]) : tplOf(m, kind).groups; };
+const itemsFor = (m, kind) => groupsFor(m, kind).flatMap(g => g[1]);
+function labelOf(c, id){
+  const a = c.answers[id]; if (a && a.label) return a.label;
+  const m = mach(c.mid), it = m ? itemsFor(m, c.kind).find(i => i[0] === id) : null;
+  return it ? it[1] : itemLabel(TEMPLATES[c.tpl], id);
+}
+
+/* ---------------- dados de exemplo ---------------- */
+function mkCheck(m, kind, date, op, counter, over){
+  const tpl = tplOf(m, kind), answers = {};
+  allItems(tpl).forEach(([id]) => answers[id] = Object.assign({s:"ok"}, over[id] || {}));
+  return {id:uid("c"), mid:m.id, kind, tpl: kind==="oper" ? TYPES[m.type].oper : TYPES[m.type].daily, at:date.toISOString(), op, counter, answers, synced:true};
+}
+function seed(){
+  const S = {v:1, sv:SEED_V, operator:"João", checklists:[], revisions:[], custom:[], extraPlan:{}, extraItems:{}};
+  MACHINES.slice(0, BASE_N).forEach((m, mi) => {
+    const groups = {};
+    m.plan.forEach(p => (groups[p.last] = groups[p.last] || []).push(p.id));
+    const older = m.plan[0].last - m.plan[0].every;
+    if (older > 0) (groups[older] = groups[older] || []).push(m.plan[0].id);
+    Object.keys(groups).map(Number).sort((a,b)=>a-b).forEach((c, gi) => {
+      const days = Math.max(1, Math.round((m.base - c) / m.perDay * 1.15));
+      S.revisions.push({id:uid("r"), mid:m.id, at:dayAt(-days,14,0).toISOString(), counter:c, services:groups[c],
+        parts:Object.fromEntries(m.parts.map(p => [p[0], p[2]])), values:Object.fromEntries(groups[c].map(id => m.plan.find(p => p.id === id)).filter(p => p.kind === "num").map(p => [p.id, p.sample + " " + p.unit])), by: gi % 2 ? "Concessionária" : "Oficina da fazenda", notes:"", synced:true});
+    });
+  });
+  S.checklists.sort((a,b) => a.at.localeCompare(b.at));
+  return S;
+}
+
+/* ---------------- estado ---------------- */
+const KEY = "diario-bordo-prototipo-v2";
+function load(){ try { const raw = localStorage.getItem(KEY); if (!raw) return null; const s = JSON.parse(raw); return s && s.v === 1 ? s : null; } catch(e){ return null; } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast("Sem espaço no navegador para guardar as fotos. O resto continua funcionando."); } }
+let S;
+const ui = {view:"op", online:true, syncing:false, op:{scr:"home", mid:null, ck:null, done:null, err:""}, panel:{mid:null, sec:"overview", from:"machines", filter:"todo"}, resetArm:false};
+
+/* ---------------- cálculos ---------------- */
+const scoped = (list, scope) => scope === "server" ? list.filter(r => r.synced) : list;
+function current(m, scope, st=S){
+  let c = m.base;
+  scoped(st.checklists, scope).forEach(r => { if (r.mid === m.id && r.counter > c) c = r.counter; });
+  scoped(st.revisions, scope).forEach(r => { if (r.mid === m.id && r.counter > c) c = r.counter; });
+  return c || m.base;
+}
+function avgDay(m, scope, st=S){
+  const cs = scoped(st.checklists, scope).filter(c => c.mid === m.id).sort((a,b) => a.at.localeCompare(b.at)).slice(-10);
+  if (cs.length < 2) return m.perDay;
+  const days = Math.max(1, (new Date(cs.at(-1).at) - new Date(cs[0].at)) / 864e5);
+  const v = (cs.at(-1).counter - cs[0].counter) / days;
+  return v > 0 ? v : m.perDay;
+}
+function planState(m, scope, st=S){
+  const cur = current(m, scope, st), per = avgDay(m, scope, st);
+  return m.plan.map(p => {
+    let last = 0;
+    scoped(st.revisions, scope).forEach(r => { if (r.mid === m.id && r.services.includes(p.id) && r.counter > last) last = r.counter; });
+    last = last || p.last;
+    const due = last + p.every, left = due - cur;
+    const status = left < 0 ? "bad" : left <= p.warn ? "warn" : "ok";
+    return {...p, lastAt:last, due, left, st:status, pct:Math.min(1, Math.max(0, (cur-last)/p.every)), days: Math.ceil(Math.abs(left)/per)};
+  }).sort((a,b) => sevRank(b.st)-sevRank(a.st) || a.left - b.left);
+}
+const sevRank = s => ({bad:2, warn:1, ok:0, na:0}[s] || 0);
+function lastCheck(m, kind, scope){ return scoped(S.checklists, scope).filter(c => c.mid === m.id && c.kind === kind).sort((a,b)=>b.at.localeCompare(a.at))[0] || null; }
+const todayCheck = (m, scope) => { const c = lastCheck(m, "diario", scope); return c && isToday(c.at) ? c : null; };
+function counts(c){ const r = {ok:0,warn:0,bad:0,na:0}; Object.values(c.answers).forEach(a => r[a.s]++); return r; }
+function issues(c){ const tpl = TEMPLATES[c.tpl]; return Object.entries(c.answers).filter(([,a]) => a.s==="warn" || (a.s==="bad")).map(([id,a]) => ({id, label:labelOf(c,id), ...a})).sort((a,b)=>sevRank(b.s)-sevRank(a.s)); }
+const worstOf = c => { const n = counts(c); return n.bad ? "bad" : n.warn ? "warn" : "ok"; };
+function leftText(m, p){
+  return p.left < 0 ? `vencida há ${fmt(-p.left)} ${U(m)}` : `faltam ${fmt(p.left)} ${U(m)} · ≈ ${p.days} ${p.days===1?"dia":"dias"}`;
+}
+const leftShort = (m, p) => p.left < 0 ? `vencida` : `${fmt(p.left)} ${U(m)}`;
+</script>
+<script>
+/* ================= CELULAR DO OPERADOR ================= */
+function gauge(m, v){
+  const s = fmt(v);
+  return `<span class="gauge" aria-label="${counterName(m)} ${s} ${U(m)}">${[...s].map(ch => ch === "." ? `<b class="sep">.</b>` : `<b>${ch}</b>`).join("")}<span class="u">${U(m)}</span></span>`;
+}
+const pending = () => S.checklists.filter(c => !c.synced).length + S.revisions.filter(r => !r.synced).length;
+const sevIco = s => ico(s === "ok" ? "check" : s === "warn" ? "warn" : s === "bad" ? "x" : "clock");
+const oAv = (type, size="") => `<span class="o-av ${size}" aria-hidden="true"><svg viewBox="0 0 32 32" class="ico">${TICO[type]}</svg></span>`;
+const sigBtn = () => `<button class="o-sig ${ui.online ? "" : "off"}" data-act="net" title="Ligar ou cortar o sinal"><i></i>${ui.online ? "Online" : "Offline"}</button>`;
+function oTop(title, back, sub){
+  return `<header class="o-top">${back ? `<button class="o-icon" data-act="go" data-scr="${back}" aria-label="Voltar">${ico("back")}</button>` : `<span class="o-gap"></span>`}
+    <h2>${esc(title)}${sub ? `<small>${esc(sub)}</small>` : ""}</h2>${sigBtn()}</header>`;
+}
+function queueBar(){
+  const n = pending(); if (!n) return "";
+  return `<div class="o-queue">${ico(ui.syncing ? "cloudup" : "cloudoff")}<span>${ui.syncing ? "Enviando…" : `${n} ${n > 1 ? "registros" : "registro"} na fila · envia quando tiver sinal`}</span></div>`;
+}
+const navHtml = tab => `<nav class="o-nav" aria-label="Navegação">
+  <button data-act="go" data-scr="home" aria-current="${tab === "home"}">${ico("home")}<span>Início</span></button>
+  <button class="o-fab" data-act="go" data-scr="scan" aria-label="Escanear QR code">${ico("qr")}</button>
+  <button data-act="go" data-scr="acts" aria-current="${tab === "acts"}">${ico("clock")}<span>Atividades</span></button></nav>`;
+function revBlock(m){
+  const p = planState(m, "device")[0];
+  return `<div class="o-card o-rev"><div class="o-rev-h"><small>Próxima revisão</small><span class="o-badge ${p.st === "ok" ? "" : p.st}">${p.left < 0 ? "Vencida" : fmt(p.left) + " " + U(m)}</span></div>
+    <b>${esc(p.label)}</b><div class="bar ${p.st}"><i style="width:${Math.round(p.pct * 100)}%"></i></div>
+    <small class="c-${p.st === "ok" ? "ok" : p.st}">${leftText(m, p)}</small></div>`;
+}
+
+/* ---------- início ---------- */
+function opHome(){
+  return `<div class="o-hello"><div><p>${new Date().toLocaleDateString("pt-BR", {weekday:"long", day:"numeric", month:"long"})}</p><h2>Olá, ${esc(S.operator)}</h2></div>
+      <div class="o-hello-r">${sigBtn()}<span class="o-me" aria-hidden="true">${esc(S.operator[0])}</span></div></div>
+    <div class="o-body">
+      ${queueBar()}
+      <button class="o-scan" data-act="go" data-scr="scan"><span class="o-scan-ico">${ico("qr")}</span><span class="o-txt"><b>Escanear QR code</b><small>Aponte para a etiqueta da máquina</small></span>${ico("chev")}</button>
+      <div class="o-sec"><h3>Máquinas</h3><span>Diário de hoje</span></div>
+      <div class="o-group">${MACHINES.map(m => { const t = todayCheck(m, "device"), p = planState(m, "device")[0];
+        return `<button class="o-cell" data-act="open-m" data-mid="${m.id}">${oAv(m.type)}
+          <span class="o-txt"><b>${esc(m.name)}</b>${p.st === "ok" ? `<small>${esc(m.model)}</small>` : `<small class="c-${p.st}">${p.st === "bad" ? "Revisão vencida" : "Revisão em " + fmt(p.left) + " " + U(m)}</small>`}</span>
+          ${t ? `<span class="o-badge ok">${ico("check")}Feito</span>` : `<span class="o-badge">Pendente</span>`}</button>`; }).join("")}</div>
+    </div>`;
+}
+
+/* ---------- últimas atividades ---------- */
+function activities(mid){
+  const cs = S.checklists.filter(c => !mid || c.mid === mid).map(c => ({at:c.at, c}));
+  const rs = S.revisions.filter(r => r.user && (!mid || r.mid === mid)).map(r => ({at:r.at, r}));
+  return cs.concat(rs).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 30);
+}
+const dayLabel = iso => { const d = new Date(iso), y = new Date(); y.setDate(y.getDate() - 1);
+  return isToday(iso) ? "Hoje" : sameDay(d, y) ? "Ontem" : d.toLocaleDateString("pt-BR", {day:"numeric", month:"long"}); };
+function actCell(a){
+  if (a.c) { const c = a.c, m = mach(c.mid); if (!m) return ""; const w = worstOf(c), n = issues(c).length;
+    return `<button class="o-cell" data-act="ck-detail" data-cid="${c.id}"><span class="o-av ${w}">${sevIco(w)}</span>
+      <span class="o-txt"><b>${esc(m.name)}</b><small>${esc(TEMPLATES[c.tpl].title)} · ${hhmm(c.at)} · ${fmt(c.counter)} ${U(m)}</small></span>
+      ${c.synced ? `<span class="o-badge ${w}">${w === "ok" ? "OK" : n + (w === "bad" ? (c.tpl === "plt-op" ? " não" : " problema") : " atenção")}</span>` : `<span class="o-badge q">Na fila</span>`}</button>`; }
+  const r = a.r, m = mach(r.mid); if (!m) return "";
+  return `<button class="o-cell" data-act="open-hist" data-mid="${m.id}"><span class="o-av">${ico("wrench")}</span>
+    <span class="o-txt"><b>${esc(m.name)}</b><small>Revisão · ${hhmm(r.at)} · ${r.services.length} ${r.services.length > 1 ? "serviços" : "serviço"}</small></span>
+    ${r.synced ? `<span class="o-badge">Revisão</span>` : `<span class="o-badge q">Na fila</span>`}</button>`;
+}
+function actGroups(list){
+  let html = "", last = "";
+  list.forEach(a => { const d = dayLabel(a.at); if (d !== last) { html += (last ? "</div>" : "") + `<div class="o-sec"><h3>${d}</h3></div><div class="o-group">`; last = d; } html += actCell(a); });
+  return last ? html + "</div>" : "";
+}
+function opActs(){
+  const html = actGroups(activities());
+  return oTop("Últimas atividades") + `<div class="o-body">${queueBar()}${html || `<div class="o-empty"><span>${ico("clock")}</span><b>Nenhuma atividade ainda</b><small>Os checklists lançados aparecem aqui.</small></div>`}</div>`;
+}
+
+/* ---------- leitura do QR (simulada) ---------- */
+function opScan(){
+  return oTop("Escanear QR code", "home") + `<div class="o-body">
+    <div class="scanner"><div class="frame"><i></i><i></i><i></i><i></i></div><div class="laser"></div></div>
+    <div class="o-sec"><h3>Ou escolha a máquina</h3></div>
+    <div class="o-group">${MACHINES.map(m => `<button class="o-cell" data-act="open-m" data-mid="${m.id}">${oAv(m.type)}<span class="o-txt"><b>${esc(m.name)}</b><small>${m.id.toUpperCase()}</small></span>${ico("chev")}</button>`).join("")}</div>
+  </div>`;
+}
+
+/* ---------- máquina ---------- */
+function opMachine(){
+  const m = mach(ui.op.mid), t = todayCheck(m, "device"), last = lastCheck(m, "diario", "device"), oper = lastCheck(m, "oper", "device");
+  const cell = (act, icon, label, extra="") => `<button class="o-cell" data-act="${act}" ${extra}><span class="o-av sm">${ico(icon)}</span><span class="o-txt"><b>${label}</b></span>${ico("chev")}</button>`;
+  return oTop(m.name, "home") + `<div class="o-body">
+    ${queueBar()}
+    <div class="o-card o-mach">
+      <div class="o-mach-h">${oAv(m.type, "lg")}<div class="o-txt"><b>${esc(m.name)}</b><small>${esc(m.model)} · ${esc(m.ident)}</small></div></div>
+      <div class="o-stats"><div><small>${counterName(m)}</small><b>${fmt(current(m, "device"))} ${U(m)}</b></div><div><small>Último diário</small><b>${last ? whenLabel(last.at) : "—"}</b></div></div>
+    </div>
+    ${revBlock(m)}
+    <div class="o-two">
+      <button class="o-tile ${t ? "done" : "primary"}" data-act="start-ck" data-kind="diario"><span class="o-tile-ico">${ico(t ? "check" : "list")}</span>
+        <b>Diário</b><small>${t ? "Feito às " + hhmm(t.at) + " · refazer" : itemsFor(m, "diario").map(i => i[1].replace("Nível do ", "").toLowerCase()).join(", ").replace(/^./, ch => ch.toUpperCase())}</small></button>
+      <button class="o-tile" data-act="start-ck" data-kind="oper"><span class="o-tile-ico">${ico("clipboard")}</span>
+        <b>Checklist</b><small>${oper ? "Feito em " + ddmm(oper.at) : "Pré-safra · " + itemsFor(m, "oper").length + " itens"}</small></button>
+    </div>
+    <div class="o-group">
+      ${cell("rev-form", "wrench", "Registrar revisão", `data-mid="${m.id}" data-from="op"`)}
+      ${cell("go", "clock", "Histórico", 'data-scr="hist"')}
+      ${cell("go", "book", "Dicas de operação", 'data-scr="tips"')}
+    </div>
+  </div>`;
+}
+
+/* ---------- checklist ---------- */
+function opCheck(){
+  const ck = ui.op.ck, m = mach(ck.mid), tpl = TEMPLATES[ck.tpl], items = itemsFor(m, ck.kind), yn = tpl.mode === "yn";
+  const done = items.filter(i => ck.answers[i[0]]).length, cur = current(m, "device");
+  const opts = yn ? [["ok", "check", "Sim"], ["bad", "x", "Não"], ["na", "", "N/A"]] : [["ok", "check", "OK"], ["warn", "warn", "Atenção"], ["bad", "x", "Problema"]];
+  return `<header class="o-top"><button class="o-icon" data-act="go" data-scr="machine" aria-label="Fechar">${ico("x")}</button>
+      <h2>${esc(tpl.title)}<small>${esc(m.name)}</small></h2><span class="o-count">${done}/${items.length}</span></header>
+    <div class="o-progress"><i style="width:${Math.round(done / items.length * 100)}%"></i></div>
+    <div class="o-body">
+      <div class="o-card o-hm"><label for="ck-counter">${counterName(m)} atual</label>
+        <div class="o-hm-in"><input id="ck-counter" inputmode="numeric" autocomplete="off" placeholder="${fmt(cur)}" value="${esc(ck.counter)}"><span>${U(m)}</span></div>
+        <small>Última leitura: ${fmt(cur)} ${U(m)}</small>${ui.op.err ? `<div class="err">${esc(ui.op.err)}</div>` : ""}</div>
+      ${groupsFor(m, ck.kind).map(([g, its]) => `<div class="o-sec"><h3>${esc(g)}</h3></div>${its.map(([id, label, , kind, unit]) => {
+        const a = ck.answers[id] || {}, open = a.s === "bad" || a.s === "warn";
+        if (kind === "num" || kind === "text") return `<div class="o-card o-q"><p>${esc(label)}</p><div class="o-hm-in"><input data-val-ck="${id}" ${kind === "num" ? 'inputmode="decimal"' : ""} placeholder="${kind === "num" ? "Valor medido" : "Anotar"}" value="${esc(a.val || "")}" aria-label="${esc(label)}">${unit ? `<span>${esc(unit)}</span>` : ""}</div></div>`;
+        return `<div class="o-card o-q" data-s="${a.s || ""}"><p>${esc(label)}</p>
+          <div class="o-seg">${opts.map(([v, ic, l]) => `<button type="button" data-act="ans" data-id="${id}" data-v="${v}" aria-pressed="${a.s === v}">${ic ? ico(ic) : ""}${l}</button>`).join("")}</div>
+          ${open ? `<div class="o-extra"><textarea id="n-${id}" data-note="${id}" rows="2" placeholder="Descreva o que encontrou">${esc(a.note || "")}</textarea>
+            <div class="o-photo">${a.photo ? `<img src="${a.photo}" alt="Foto">` : ""}<label class="o-btn sec sm">${ico("camera")}${a.photo ? "Trocar foto" : "Adicionar foto"}<input type="file" accept="image/*" capture="environment" data-photo="${id}"></label></div></div>` : ""}</div>`; }).join("")}`).join("")}
+    </div>
+    <div class="o-foot"><button class="o-btn primary" data-act="submit-ck" ${done < items.length ? "disabled" : ""}>Finalizar checklist</button></div>`;
+}
+
+/* ---------- resumo ---------- */
+function opDone(){
+  const c = S.checklists.find(x => x.id === ui.op.done), m = mach(c.mid), n = counts(c), w = worstOf(c), yn = c.tpl === "plt-op";
+  const title = w === "ok" ? `${TEMPLATES[c.tpl].title} concluído`
+    : w === "bad" ? (yn ? `${n.bad} ${n.bad > 1 ? "itens não feitos" : "item não feito"}` : `${n.bad} ${n.bad > 1 ? "problemas encontrados" : "problema encontrado"}`)
+    : `${n.warn} ${n.warn > 1 ? "pontos" : "ponto"} de atenção`;
+  return oTop("Resumo") + `<div class="o-body">
+    <div class="o-done"><span class="o-done-ico ${w}">${sevIco(w)}</span><h2>${title}</h2>
+      ${c.synced ? `<span class="o-badge ok">${ico("check")}Enviado ao painel</span>` : `<span class="o-badge q">${ui.syncing ? "Enviando…" : "Na fila · envia com sinal"}</span>`}
+      ${w !== "ok" && c.synced ? `<small>O dono foi avisado no WhatsApp</small>` : ""}</div>
+    <div class="o-card o-kv"><div><span>Máquina</span><b>${esc(m.name)}</b></div><div><span>${counterName(m)}</span><b>${fmt(c.counter)} ${U(m)}</b></div>
+      <div><span>${yn ? "Sim" : "OK"}</span><b class="c-ok">${n.ok}</b></div>
+      ${yn ? `<div><span>Não</span><b class="c-bad">${n.bad}</b></div>` : `<div><span>Atenção</span><b class="c-warn">${n.warn}</b></div><div><span>Problema</span><b class="c-bad">${n.bad}</b></div>`}</div>
+    ${revBlock(m)}
+    <button class="o-btn primary" data-act="go" data-scr="home">Voltar ao início</button>
+    <button class="o-btn sec" data-act="go" data-scr="machine">Ver máquina</button>
+  </div>`;
+}
+
+/* ---------- dicas ---------- */
+function opTips(){
+  const m = mach(ui.op.mid);
+  return oTop("Dicas de operação", "machine", m.name) + `<div class="o-body">
+    <div class="o-group">${TIPS[m.type].map(([t, d], i) => `<div class="o-tip"><span class="n">${i + 1}</span><div><b>${esc(t)}</b><p>${esc(d)}</p></div></div>`).join("")}</div>
+    ${m.type === "plt" ? `<div class="o-sec"><h3>Sementes por metro</h3></div><div class="o-card o-calc">
+      <div class="field"><label for="c-pop">Plantas/ha</label><input id="c-pop" data-calc inputmode="numeric" value="300000"></div>
+      <div class="field"><label for="c-esp">Espaç. (cm)</label><input id="c-esp" data-calc inputmode="decimal" value="45"></div>
+      <div class="field"><label for="c-ger">Germ. (%)</label><input id="c-ger" data-calc inputmode="numeric" value="90"></div>
+      <div class="res" id="c-res"></div></div>` : ""}
+    <div class="o-group"><div class="o-cell"><span class="o-av sm">${ico("play")}</span><span class="o-txt"><b>Vídeos explicativos</b><small>Em breve</small></span></div></div>
+  </div>`;
+}
+function updateCalc(){
+  const r = $("#c-res"); if (!r) return;
+  const num = id => parseFloat(String($(id).value).replace(/\./g, "").replace(",", ".")) || 0;
+  const base = num("#c-pop") * num("#c-esp") / 100 / 10000, ger = Math.min(100, num("#c-ger"));
+  const adj = base * (1 + (100 - ger) / 100);
+  r.innerHTML = `<span>sementes/metro</span><b>${adj.toLocaleString("pt-BR", {maximumFractionDigits:1})}</b>`;
+}
+
+/* ---------- histórico ---------- */
+function opHist(){
+  const m = mach(ui.op.mid);
+  const rs = scoped(S.revisions, "device").filter(r => r.mid === m.id).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 4);
+  const cs = S.checklists.filter(c => c.mid === m.id).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8).map(c => ({at:c.at, c}));
+  return oTop("Histórico", "machine", m.name) + `<div class="o-body">
+    <div class="o-sec"><h3>Revisões</h3></div>
+    ${rs.map(r => `<div class="o-card o-hist"><div class="o-hist-h"><b>${ddmmyy(r.at)}</b><span>${fmt(r.counter)} ${U(m)}</span></div>
+      <p>${r.services.map(s => esc(svcText(m, r, s))).join(", ")}</p>
+      <dl class="kv">${m.parts.filter(p => r.parts[p[0]]).map(p => `<dt>${esc(p[1])}</dt><dd>${esc(r.parts[p[0]])}</dd>`).join("")}</dl></div>`).join("") || `<p class="muted">Nenhuma revisão registrada.</p>`}
+    <div class="o-sec"><h3>Checklists</h3></div>
+    ${cs.length ? `<div class="o-group">${cs.map(actCell).join("")}</div>` : `<p class="muted">Nenhum checklist lançado ainda.</p>`}
+  </div>`;
+}
+
+let lastOpKey = "";
+function renderOp(){
+  const el = $("#op"), o = ui.op, key = o.scr + (o.mid || ""), same = key === lastOpKey, top = el.scrollTop, y = window.scrollY;
+  const screens = {home:opHome, acts:opActs, scan:opScan, machine:opMachine, check:opCheck, done:opDone, tips:opTips, hist:opHist};
+  const nav = o.scr === "home" || o.scr === "acts" ? navHtml(o.scr) : "";
+  el.innerHTML = `<div class="o-wrap"><div class="o-screen">${(screens[o.scr] || opHome)()}</div>${nav}</div>`;
+  el.scrollTop = same ? top : 0;
+  if (ui.view === "op") window.scrollTo(0, same ? y : 0);
+  lastOpKey = key;
+  if (o.scr === "tips") updateCalc();
+}
+</script>
+<script>
+/* ================= PAINEL DO DONO ================= */
+const SECS = [["overview", "grid", "Visão geral"], ["machines", "truck", "Máquinas"], ["checks", "list", "Diários e checklists"], ["services", "wrench", "Revisões"]];
+const longToday = () => new Date().toLocaleDateString("pt-BR", {weekday:"long", day:"numeric", month:"long"});
+const addBtns = () => `<button class="pd-btn" data-act="qr-all">${ico("qr")}Etiquetas QR</button><button class="pd-btn primary" data-act="add-form">${ico("plus")}Adicionar veículo</button>`;
+const pdHead = (title, sub, acts) => `<div class="pd-head"><div><h2>${esc(title)}</h2>${sub ? `<p>${esc(sub)}</p>` : ""}</div>${acts ? `<div class="pd-acts">${acts}</div>` : ""}</div>`;
+function resultBadge(c, withTime){
+  const w = worstOf(c), n = issues(c).length, yn = c.tpl === "plt-op";
+  const txt = w === "ok" ? "OK" : n + (w === "bad" ? (yn ? " não" : n > 1 ? " problemas" : " problema") : " atenção");
+  return `<span class="o-badge ${w}">${withTime ? sevIco(w) + hhmm(c.at) : txt}</span>`;
+}
+function fleetStats(){
+  const todays = scoped(S.checklists, "server").filter(c => isToday(c.at));
+  const plans = MACHINES.flatMap(m => planState(m, "server").map(p => ({m, p})));
+  return {todays, plans,
+    done: MACHINES.filter(m => todayCheck(m, "server")).length,
+    oper: MACHINES.filter(m => lastCheck(m, "oper", "server")).length,
+    bad: todays.reduce((s, c) => s + issues(c).filter(i => i.s === "bad").length, 0),
+    warn: todays.reduce((s, c) => s + issues(c).filter(i => i.s === "warn").length, 0),
+    pBad: plans.filter(x => x.p.st === "bad").length, pWarn: plans.filter(x => x.p.st === "warn").length};
+}
+function pdSide(st){
+  const cur = ui.panel.mid ? (ui.panel.from || "machines") : ui.panel.sec, todo = st.pBad + st.pWarn;
+  const n = {overview:"", machines:`<span class="n">${MACHINES.length}</span>`,
+    checks: st.todays.length ? `<span class="n">${st.todays.length}</span>` : "",
+    services: todo ? `<span class="n ${st.pBad ? "bad" : "warn"}">${todo}</span>` : ""};
+  return `<aside class="pd-side"><nav class="pd-nav" aria-label="Seções do painel">${SECS.map(([k, ic, l]) => `<button data-act="p-nav" data-sec="${k}" aria-current="${cur === k}">${ico(ic)}<span>${l}</span>${n[k]}</button>`).join("")}</nav>
+    <button class="pd-reset" data-act="reset">${ui.resetArm ? "Toque de novo para confirmar" : "Reiniciar demonstração"}</button></aside>`;
+}
+const kpi = (sec, ic, cls, label, val, sub) => `<button class="pd-card pd-kpi" data-act="p-nav" data-sec="${sec}"><span class="pd-kpi-ico ${cls}">${ico(ic)}</span><span><small>${label}</small><b>${val}</b><em>${sub}</em></span></button>`;
+function ckRow(c){
+  const m = mach(c.mid); if (!m) return "";
+  return `<button class="pd-r" data-act="ck-detail" data-cid="${c.id}"><span class="o-av ${worstOf(c)}">${sevIco(worstOf(c))}</span>
+    <span class="o-txt"><b>${esc(m.name)}</b><small>${esc(TEMPLATES[c.tpl].title)} · ${esc(c.op)} · ${whenLabel(c.at)}</small></span>${resultBadge(c)}</button>`;
+}
+
+/* ---------- visão geral ---------- */
+function pdOverview(st){
+  const att = [];
+  MACHINES.forEach(m => {
+    const t = todayCheck(m, "server");
+    if (t) issues(t).forEach(i => att.push({s:i.s, title:i.label, sub:`${m.name} · ${t.op} às ${hhmm(t.at)}${i.note ? " · " + i.note : ""}`, act:`data-act="ck-detail" data-cid="${t.id}"`}));
+    planState(m, "server").filter(p => p.st !== "ok").forEach(p => att.push({s:p.st, title:p.label, sub:`${m.name} · ${leftText(m, p)}`, act:`data-act="p-open" data-mid="${m.id}"`}));
+  });
+  att.sort((a, b) => sevRank(b.s) - sevRank(a.s));
+  const recent = scoped(S.checklists, "server").slice().sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
+  const pend = MACHINES.length - st.done;
+  return pdHead("Visão geral", longToday(), addBtns()) + `
+    <div class="pd-kpis">
+      ${kpi("checks", "list", st.done === MACHINES.length ? "ok" : "", "Diários hoje", `${st.done}<span>/${MACHINES.length}</span>`, pend ? `${pend} pendente${pend > 1 ? "s" : ""}` : "todos feitos")}
+      ${kpi("checks", "x", st.bad ? "bad" : st.warn ? "warn" : "ok", "Problemas hoje", st.bad, `${st.warn} ponto${st.warn === 1 ? "" : "s"} de atenção`)}
+      ${kpi("checks", "clipboard", st.oper === MACHINES.length ? "ok" : "", "Checklist pré-safra", `${st.oper}<span>/${MACHINES.length}</span>`, "máquinas conferidas")}
+      ${kpi("services", "wrench", st.pBad ? "bad" : st.pWarn ? "warn" : "ok", "Revisões a fazer", st.pBad + st.pWarn, `${st.pBad} vencida${st.pBad === 1 ? "" : "s"}`)}
+    </div>
+    <div class="pd-two">
+      <div class="pd-card"><div class="pd-card-h"><h3>Precisa de atenção</h3><span class="muted">${att.length}</span></div>
+        ${att.length ? att.map(r => `<button class="pd-r" ${r.act}><span class="sev ${r.s}">${sevIco(r.s)}</span><span class="o-txt"><b>${esc(r.title)}</b><small>${esc(r.sub)}</small></span>${ico("chev")}</button>`).join("")
+          : `<div class="pd-empty"><b>Tudo em dia</b><span>Nenhum problema ou revisão pendente.</span></div>`}</div>
+      <div class="pd-card"><div class="pd-card-h"><h3>Últimos lançamentos</h3><button class="pd-link" data-act="p-nav" data-sec="checks">Ver todos</button></div>
+        ${recent.length ? recent.map(ckRow).join("") : `<div class="pd-empty"><b>Nada recebido ainda</b><span>Diários e checklists dos operadores aparecem aqui.</span></div>`}</div>
+    </div>`;
+}
+
+/* ---------- máquinas ---------- */
+function pdMachines(){
+  return pdHead("Máquinas", `${MACHINES.length} cadastradas`, addBtns()) + `<div class="pd-card">
+    <div class="pd-th g-m"><span>Máquina</span><span class="c-hm">Horímetro / km</span><span>Diário de hoje</span><span>Próxima revisão</span><span></span></div>
+    ${MACHINES.map(m => { const t = todayCheck(m, "server"), p = planState(m, "server")[0];
+      return `<button class="pd-tr g-m" data-act="p-open" data-mid="${m.id}">
+        <span class="pd-name">${oAv(m.type)}<span class="o-txt"><b>${esc(m.name)}</b><small>${esc(m.model)} · ${esc(m.ident)}</small></span></span>
+        <span class="c-hm mono">${fmt(current(m, "server"))} ${U(m)}</span>
+        <span>${t ? resultBadge(t, true) : `<span class="o-badge">Pendente</span>`}</span>
+        <span class="c-rev"><span><span>${esc(p.label)}</span><b class="c-${p.st === "ok" ? "ok" : p.st}">${leftShort(m, p)}</b></span><span class="bar ${p.st}"><i style="width:${Math.round(p.pct * 100)}%"></i></span></span>
+        ${ico("chev")}</button>`; }).join("")}</div>`;
+}
+
+/* ---------- diários e checklists ---------- */
+function pdChecks(){
+  const f = ui.panel.ckf || "all";
+  const cs = scoped(S.checklists, "server").filter(c => f === "all" || c.kind === f).sort((a, b) => b.at.localeCompare(a.at));
+  return pdHead("Diários e checklists", `${cs.length} recebido${cs.length === 1 ? "" : "s"}`,
+    `<div class="pd-filter">${[["all", "Todos"], ["diario", "Diários"], ["oper", "Checklists"]].map(([k, l]) => `<button data-act="ck-filter" data-v="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}</div>`) +
+  `<div class="pd-card">${cs.length ? `
+    <div class="pd-th g-c"><span>Máquina</span><span class="c-tpl">Tipo</span><span class="c-hm">Leitura</span><span>Resultado</span></div>
+    ${cs.map(c => { const m = mach(c.mid); if (!m) return "";
+      return `<button class="pd-tr g-c" data-act="ck-detail" data-cid="${c.id}"><span class="pd-name">${oAv(m.type, "sm")}<span class="o-txt"><b>${esc(m.name)}</b><small>${esc(c.op)} · ${whenLabel(c.at)}</small></span></span>
+        <span class="c-tpl">${esc(TEMPLATES[c.tpl].title)}</span><span class="c-hm mono">${fmt(c.counter)} ${U(m)}</span><span>${resultBadge(c)}</span></button>`; }).join("")}`
+    : `<div class="pd-empty"><b>Nada recebido ainda</b><span>Quando o operador lançar um diário ou checklist no celular, ele aparece aqui.</span></div>`}</div>`;
+}
+
+/* ---------- revisões (manutenção programada) ---------- */
+function pdServices(st){
+  const f = ui.panel.filter || "todo";
+  const rows = st.plans.filter(x => f === "all" || x.p.st !== "ok").sort((a, b) => sevRank(b.p.st) - sevRank(a.p.st) || a.p.left / a.p.every - b.p.left / b.p.every);
+  return pdHead("Revisões", "Manutenção programada pelo horímetro e pela quilometragem",
+    `<div class="pd-filter">${[["todo", "A fazer"], ["all", "Todas"]].map(([k, l]) => `<button data-act="svc-filter" data-v="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}</div>`) +
+  `<div class="pd-card">${rows.length ? `<div class="pd-th g-s"><span>Revisão</span><span class="c-due">Próxima em</span><span>Situação</span><span></span></div>
+    ${rows.map(({m, p}) => `<div class="pd-tr g-s"><span class="pd-name"><span class="sev ${p.st}">${sevIco(p.st)}</span><span class="o-txt"><b>${esc(p.label)}</b><small>${esc(m.name)}</small></span></span>
+      <span class="c-due mono">${fmt(p.due)} ${U(m)}</span>
+      <span><span class="o-badge ${p.st === "ok" ? "" : p.st}">${p.left < 0 ? "Vencida há " + fmt(-p.left) + " " + U(m) : "Faltam " + fmt(p.left) + " " + U(m)}</span></span>
+      <span class="c-act"><button class="pd-btn sm" data-act="rev-form" data-mid="${m.id}" data-from="panel">${ico("wrench")}Registrar</button></span></div>`).join("")}`
+    : `<div class="pd-empty"><b>Nenhuma revisão a fazer</b><span>Toda a frota está em dia.</span></div>`}</div>`;
+}
+
+/* ---------- etiqueta QR ---------- */
+function qrSvg(text){
+  if (typeof qrcode !== "function") return "";
+  const q = qrcode(0, "M"); q.addData(text); q.make();
+  const n = q.getModuleCount(), b = 2; let d = "";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c + b} ${r + b}h1v1h-1z`;
+  return `<svg viewBox="0 0 ${n + 2 * b} ${n + 2 * b}" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#111"/></svg>`;
+}
+const qrText = m => APP_URL + "#" + m.id;
+const stickerHtml = m => `<div class="sticker"><div class="band">Checklist antes de ligar</div>${qrSvg(qrText(m))}<strong>${esc(m.name)}</strong><span class="id">${m.id.toUpperCase()}</span></div>`;
+
+/* ---------- diário e checklist da máquina (itens + último resultado) ---------- */
+function itemsCard(m, kind){
+  const last = lastCheck(m, kind, "server"), gs = groupsFor(m, kind), n = gs.reduce((s, g) => s + g[1].length, 0);
+  const title = kind === "diario" ? "Diário" : "Checklist pré-safra";
+  const rows = gs.map(([g, its]) => `<div class="pd-grp">${esc(g)}</div>` + its.map(it => {
+    const a = last && last.answers[it[0]], custom = g === "Adicionados pelo dono";
+    const sub = [it[3] === "num" ? "Número" + (it[4] ? " (" + it[4] + ")" : "") : it[3] === "text" ? "Texto" : "",
+      a && a.val ? "Último: " + a.val + (it[4] ? " " + it[4] : "") : "", a && a.note ? a.note : ""].filter(Boolean).join(" · ");
+    return `<div class="pd-item"><span class="sev ${a ? a.s : "none"}">${a ? sevIco(a.s) : "–"}</span><span class="o-txt"><b>${esc(it[1])}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</span>
+      ${custom ? `<button class="pd-rm" data-act="item-rm" data-mid="${m.id}" data-kind="${kind}" data-id="${it[0]}" aria-label="Remover ${esc(it[1])}">${ico("x")}</button>` : ""}</div>`; }).join("")).join("");
+  const status = last ? `${whenLabel(last.at)} · ${esc(last.op)}` : (kind === "diario" ? "Ainda não feito" : "Não feito nesta safra");
+  return `<div class="pd-card"><div class="pd-card-h"><h3>${title}</h3><span class="muted">${status}</span></div>
+    ${kind === "diario" ? `<div class="pd-items">${rows}</div>` : `<details class="pd-more"><summary>Ver os ${n} itens</summary><div class="pd-items">${rows}</div></details>`}
+    <div class="pd-pad"><button class="add-row" data-act="item-add" data-mid="${m.id}" data-kind="${kind}">${ico("plus")}Adicionar item</button></div></div>`;
+}
+
+/* ---------- detalhe da máquina ---------- */
+function pdDetail(){
+  const m = mach(ui.panel.mid), ps = planState(m, "server"), last = lastCheck(m, "diario", "server"), operLast = lastCheck(m, "oper", "server"), todo = ps.filter(p => p.st !== "ok").length;
+  const rs = scoped(S.revisions, "server").filter(r => r.mid === m.id).sort((a, b) => b.at.localeCompare(a.at));
+  const cs = scoped(S.checklists, "server").filter(c => c.mid === m.id).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8);
+  const from = SECS.find(s => s[0] === (ui.panel.from || "machines")) || SECS[1];
+  return `<button class="pd-crumb" data-act="p-back">${ico("back")}${from[2]}</button>
+    <div class="pd-head"><div class="pd-title">${oAv(m.type, "lg")}<div><h2>${esc(m.name)}</h2><p>${esc(m.model)} · ${esc(m.ident)}</p></div></div>
+      <div class="pd-acts"><button class="pd-btn" data-act="open-op" data-mid="${m.id}">${ico("phone")}Abrir no celular</button><button class="pd-btn primary" data-act="rev-form" data-mid="${m.id}" data-from="panel">${ico("wrench")}Registrar revisão</button></div></div>
+    <div class="pd-card pd-stats"><div><small>${counterName(m)}</small><b>${fmt(current(m, "server"))} ${U(m)}</b></div><div><small>Último diário</small><b>${last ? whenLabel(last.at) : "—"}</b></div>
+      <div><small>Checklist pré-safra</small><b>${operLast ? "Feito em " + ddmm(operLast.at) : "Não feito"}</b></div><div><small>Revisões a fazer</small><b class="${todo ? (ps[0].st === "bad" ? "c-bad" : "c-warn") : "c-ok"}">${todo}</b></div></div>
+    <div class="pd-detail"><div class="pd-col"><div class="pd-pair">${itemsCard(m, "diario")}${itemsCard(m, "oper")}</div>
+      <div class="pd-card"><div class="pd-card-h"><h3>Plano de revisão</h3></div>
+        <div class="pd-plan">${ps.map(p => `<div><div><b>${esc(p.label)}</b><br><small>a cada ${fmt(p.every)} ${U(m)}${p.kind === "num" ? " · informar " + esc(p.unit || "número") : p.kind === "text" ? " · anotar texto" : ""} · última em ${fmt(p.lastAt)} ${U(m)}</small></div>
+          <span class="o-badge ${p.st === "ok" ? "" : p.st}">${p.left < 0 ? "Vencida" : "Faltam " + fmt(p.left) + " " + U(m)}</span><div class="bar ${p.st}"><i style="width:${Math.round(p.pct * 100)}%"></i></div></div>`).join("")}</div>
+        <div class="pd-pad"><button class="add-row" data-act="plan-add" data-mid="${m.id}">${ico("plus")}Adicionar revisão</button></div></div>
+      <div class="pd-card"><div class="pd-card-h"><h3>Histórico de revisões</h3><span class="muted">${rs.length}</span></div>
+        <div class="tbl"><table><thead><tr><th>Data</th><th class="r">${counterName(m)}</th><th>Serviço</th>${m.parts.map(p => `<th>${esc(p[1])}</th>`).join("")}</tr></thead><tbody>
+        ${rs.length ? "" : `<tr><td colspan="${3 + m.parts.length}" class="muted">Nenhuma revisão registrada ainda.</td></tr>`}${rs.map(r => `<tr><td>${ddmmyy(r.at)}</td><td class="r mono">${fmt(r.counter)}</td><td>${r.services.map(s => esc(svcText(m, r, s))).join("<br>")}</td>${m.parts.map(p => `<td>${esc(r.parts[p[0]] || "—")}</td>`).join("")}</tr>`).join("")}
+        </tbody></table></div></div>
+      <div class="pd-card"><div class="pd-card-h"><h3>Diários e checklists</h3><span class="muted">${cs.length}</span></div>
+        ${cs.length ? cs.map(ckRow).join("") : `<div class="pd-empty"><span>Nada recebido desta máquina ainda.</span></div>`}</div>
+    </div>
+    <aside class="pd-col"><div class="pd-card"><div class="pd-card-h"><h3>Etiqueta QR</h3></div><div class="pd-pad">${stickerHtml(m)}
+      <button class="pd-btn" data-act="dl-sticker" data-mid="${m.id}" hidden>${ico("download")}Baixar etiqueta</button>
+      <button class="pd-btn" data-act="copy-link" data-mid="${m.id}">${ico("link")}Copiar link</button></div></div></aside></div>`;
+}
+
+function renderPanel(){
+  ui.panel.sec = ui.panel.sec || "overview";
+  const st = fleetStats();
+  const main = ui.panel.mid ? pdDetail() : ({overview:pdOverview, machines:pdMachines, checks:pdChecks, services:pdServices}[ui.panel.sec] || pdOverview)(st);
+  $("#panel").innerHTML = `<div class="pd">${pdSide(st)}<div class="pd-main">${main}<button class="pd-reset" data-act="reset">${ui.resetArm ? "Toque de novo para confirmar" : "Reiniciar demonstração"}</button></div></div>`;
+  if (downloadsApi || !window.claude) document.querySelectorAll('#panel [data-act="dl-sticker"]').forEach(b => b.hidden = false);
+}
+</script>
+<script>
+/* ================= FOLHAS, ENVIO, EVENTOS ================= */
+let downloadsApi = null, toastT = 0;
+function toast(t){ const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2500); }
+function openSheet(title, body){
+  $("#sheet-in").innerHTML = `<div class="sheet-head"><h3>${esc(title)}</h3><button class="x" data-act="sheet-close" aria-label="Fechar">${ico("x")}</button></div><div class="sheet-body">${body}</div>`;
+  $("#sheet").hidden = false; document.body.style.overflow = "hidden";
+  if (downloadsApi || !window.claude) $("#sheet-in").querySelectorAll('[data-act="dl-sticker"]').forEach(b => b.hidden = false);
+}
+function closeSheet(){ $("#sheet").hidden = true; document.body.style.overflow = ""; }
+
+function revForm(mid, from){
+  const m = mach(mid), scope = from === "op" ? "device" : "server", ps = planState(m, scope);
+  const lastR = scoped(S.revisions, scope).filter(r => r.mid === m.id).sort((a, b) => b.at.localeCompare(a.at))[0];
+  openSheet("Revisão · " + m.name, `
+    <div class="field"><label for="rf-counter">${counterName(m)} (${U(m)})</label><input id="rf-counter" inputmode="numeric" value="${current(m, scope)}"></div>
+    <div class="label">O que foi feito</div>
+    <div class="svc">${m.plan.map(p => { const s = ps.find(x => x.id === p.id);
+      return `<div class="svc-row"><label><input type="checkbox" data-svc="${p.id}" ${s.st !== "ok" ? "checked" : ""}>${esc(p.label)}<small class="c-${s.st === "ok" ? "ok" : s.st}">${leftShort(m, s)}</small></label>${p.kind === "num" || p.kind === "text" ? `<div class="val"><input data-val="${p.id}" ${p.kind === "num" ? 'inputmode="decimal"' : ""} placeholder="${p.kind === "num" ? "Valor medido" : "Anotar"}" aria-label="${esc(p.label)}">${p.unit ? `<span>${esc(p.unit)}</span>` : ""}</div>` : ""}</div>`; }).join("")}</div>
+    <div class="label">Produtos usados</div>
+    <div class="form-grid">${m.parts.map(p => `<div class="field"><label for="rf-p-${p[0]}">${esc(p[1])}</label><input id="rf-p-${p[0]}" value="${esc((lastR && lastR.parts[p[0]]) || p[2])}"></div>`).join("")}</div>
+    <div class="err" id="rf-err"></div>
+    <button class="btn primary big" data-act="rev-save" data-mid="${m.id}" data-from="${from}">Salvar revisão</button>`);
+}
+function saveRev(mid, from){
+  const m = mach(mid), services = [...document.querySelectorAll("[data-svc]:checked")].map(x => x.dataset.svc);
+  const v = parseInt(String($("#rf-counter").value).replace(/\D/g, ""), 10), err = $("#rf-err");
+  if (!services.length) { err.textContent = "Marque o que foi feito."; return; }
+  if (isNaN(v)) { err.textContent = `Informe o ${counterName(m).toLowerCase()}.`; return; }
+  const values = {}; let miss = "";
+  services.forEach(id => { const p = m.plan.find(x => x.id === id), el = document.querySelector(`[data-val="${id}"]`);
+    if (el) { const x = el.value.trim(); if (x) values[id] = x + (p.unit ? " " + p.unit : ""); else if (p.kind === "num") miss = miss || p.label; } });
+  if (miss) { err.textContent = `Informe o valor de "${miss}".`; return; }
+  const parts = {}; m.parts.forEach(p => { const x = $("#rf-p-" + p[0]).value.trim(); if (x) parts[p[0]] = x; });
+  S.revisions.push({id:uid("r"), mid, at:new Date().toISOString(), counter:v, services, parts, values, by: from === "op" ? S.operator : "Oficina da fazenda", notes:"", synced: from === "panel", user:true});
+  closeSheet(); save(); renderAll(); toast("Revisão salva");
+  if (from === "op" && ui.online) sync();
+}
+function ckDetail(cid){
+  const c = S.checklists.find(x => x.id === cid), m = mach(c.mid), tpl = TEMPLATES[c.tpl], is = issues(c), n = counts(c);
+  openSheet(`${m.name} · ${tpl.title}`, `
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">${whenLabel(c.at)}</span><span class="chip">${esc(c.op)}</span><span class="chip mono">${fmt(c.counter)} ${U(m)}</span></div>
+    <div class="list">${is.map(i => `<div class="row"><span class="sev ${i.s}">${sevIco(i.s)}</span><span class="t"><b>${esc(i.label)}</b>${i.note ? `<small style="white-space:normal">${esc(i.note)}</small>` : ""}</span>${i.photo ? `<img src="${i.photo}" alt="Foto" style="width:64px;height:64px;object-fit:cover;border-radius:8px">` : ""}</div>`).join("")}
+      ${Object.entries(c.answers).filter(([, a]) => a.val).map(([id, a]) => `<div class="row"><span class="sev ok">${sevIco("ok")}</span><span class="t"><b>${esc(labelOf(c, id))}</b><small>${esc(a.val)}${a.unit ? " " + esc(a.unit) : ""}</small></span></div>`).join("")}
+      <div class="row"><span class="sev ok">${sevIco("ok")}</span><span class="t"><b>${n.ok} itens OK</b></span></div></div>`);
+}
+function qrAll(){
+  openSheet("Etiquetas QR", `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">${MACHINES.map(m => `<div style="display:flex;flex-direction:column;gap:8px">${stickerHtml(m)}<button class="btn" data-act="dl-sticker" data-mid="${m.id}" hidden>${ico("download")}Baixar</button></div>`).join("")}</div>`);
+}
+async function downloadSticker(mid){
+  if (!downloadsApi && window.claude) return;
+  const m = mach(mid), W = 600, H = 800, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const g = cv.getContext("2d");
+  try { await document.fonts.ready; } catch(e){}
+  g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+  g.strokeStyle = "#111"; g.lineWidth = 12; g.strokeRect(6, 6, W - 12, H - 12);
+  g.fillStyle = "#1F5F2A"; g.fillRect(36, 36, W - 72, 74);
+  g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle";
+  g.font = "800 34px Archivo, 'Arial Narrow', Arial, sans-serif"; g.fillText("CHECKLIST ANTES DE LIGAR", W / 2, 74); g.fillStyle = "#111";
+  if (typeof qrcode === "function") {
+    const q = qrcode(0, "M"); q.addData(qrText(m)); q.make();
+    const n = q.getModuleCount(), cell = Math.floor(440 / n), size = cell * n, x0 = (W - size) / 2, y0 = 140;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) g.fillRect(x0 + c * cell, y0 + r * cell, cell, cell);
+  }
+  g.font = "800 56px Archivo, 'Arial Narrow', Arial, sans-serif"; g.fillText(m.name, W / 2, 650);
+  g.font = "600 30px 'IBM Plex Mono', Consolas, monospace"; g.fillText(m.id.toUpperCase(), W / 2, 715);
+  const blob = await new Promise(r => cv.toBlob(r, "image/png"));
+  if (!downloadsApi) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `etiqueta-${m.id}.png`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); toast("Etiqueta baixada"); return; }
+  try { await downloadsApi.save({filename:`etiqueta-${m.id}.png`, data:blob}); toast("Etiqueta salva"); }
+  catch(e){ if (e && e.code !== "declined") toast("Não foi possível baixar aqui."); }
+}
+
+/* ---------- adicionar veículo e revisões (dono) ---------- */
+const suggestName = t => `${TYPES[t].label} ${pad(nextNum(t))}`;
+const defaultPlan = t => DEFAULTS[t].plan.map(([id, label, every]) => ({id, label, every, kind:"check", unit:""}));
+const digits = v => parseInt(String(v).replace(/\D/g, ""), 10);
+function planFields(unit){
+  return `<div class="field"><label for="np-name">Revisão</label><input id="np-name" placeholder="Ex.: Pressão dos pneus"></div>
+    <div class="form-grid">
+      <div class="field"><label for="np-every">A cada (${unit})</label><input id="np-every" inputmode="numeric" placeholder="${unit === "km" ? "10000" : "250"}"></div>
+      <div class="field" id="np-unit-wrap" hidden><label for="np-unit">Unidade</label><input id="np-unit" placeholder="psi, mm, %, litros"></div>
+    </div>
+    <div class="field"><span class="flabel">O que informar</span><div class="kinds" role="radiogroup" aria-label="O que informar">
+      <label><input type="radio" name="np-kind" value="check" checked><span>Só marcar</span></label>
+      <label><input type="radio" name="np-kind" value="num"><span>Número</span></label>
+      <label><input type="radio" name="np-kind" value="text"><span>Texto</span></label></div></div>
+    <div class="err" id="np-err"></div>`;
+}
+function readPlanFields(unit){
+  const label = $("#np-name").value.trim(), every = digits($("#np-every").value), err = $("#np-err");
+  const kind = (document.querySelector('[name="np-kind"]:checked') || {}).value || "check";
+  if (!label) { err.textContent = "Dê um nome para a revisão."; return null; }
+  if (!every) { err.textContent = `Informe de quantas em quantas ${unit === "km" ? "km" : "horas"}.`; return null; }
+  return {label, every, kind, unit: kind === "num" ? $("#np-unit").value.trim() : ""};
+}
+const kindTag = p => p.kind === "num" ? `<small class="tag">${esc(p.unit || "número")}</small>` : p.kind === "text" ? `<small class="tag">texto</small>` : "";
+function newVehicle(t){ ui.add = {type:t, name:"", model:"", ident:"", counter:"", plan:defaultPlan(t), adding:false}; addForm(); }
+function readAddForm(){
+  const a = ui.add, v = id => ($("#" + id) || {}).value || "";
+  const nm = v("nv-name"); a.name = nm === suggestName(a.type) ? "" : nm;
+  a.model = v("nv-model"); a.ident = v("nv-ident"); a.counter = v("nv-counter");
+  a.plan.forEach(p => { const e = $(`[data-every="${p.id}"]`); if (e) p.every = digits(e.value) || ""; });
+}
+function addForm(){
+  const a = ui.add, t = a.type, km = t === "cam", u = km ? "km" : "h";
+  const top = $("#sheet").hidden ? 0 : $("#sheet-in").scrollTop;
+  openSheet("Adicionar veículo", `
+    <div class="types">${Object.keys(TYPES).map(x => `<button type="button" class="type-btn" data-act="add-type" data-v="${x}" aria-pressed="${x === t}">${tico(x)}<span>${TYPES[x].label}</span></button>`).join("")}</div>
+    <div class="form-grid">
+      <div class="field"><label for="nv-name">Nome</label><input id="nv-name" value="${esc(a.name || suggestName(t))}"></div>
+      <div class="field"><label for="nv-model">Modelo</label><input id="nv-model" value="${esc(a.model)}" placeholder="${km ? "Ex.: Volvo FH 540" : t === "emp" ? "Ex.: Hyster H50FT" : t === "plt" ? "Ex.: 13 linhas a 50 cm" : "Ex.: Massey Ferguson 7415"}"></div>
+      <div class="field"><label for="nv-ident">${km ? "Placa" : "Nº de frota"}</label><input id="nv-ident" value="${esc(a.ident)}" placeholder="${km ? "ABC1D23" : "Frota 202"}"></div>
+      <div class="field"><label for="nv-counter">${km ? "Hodômetro (km)" : "Horímetro (h)"}</label><input id="nv-counter" inputmode="numeric" value="${esc(a.counter)}" placeholder="0"></div>
+    </div>
+    <div class="label">Revisões</div>
+    <div class="pe">${a.plan.map(p => `<div><span>${esc(p.label)}${kindTag(p)}</span><input data-every="${p.id}" inputmode="numeric" value="${p.every}" aria-label="Intervalo de ${esc(p.label)}"><small>${u}</small><button type="button" class="rm" data-act="add-rm" data-id="${p.id}" aria-label="Remover revisão">${ico("x")}</button></div>`).join("")}</div>
+    ${a.adding ? `<div class="card box">${planFields(u)}<div class="acts"><button type="button" class="btn" data-act="add-plan-cancel">Cancelar</button><button type="button" class="btn primary" data-act="add-plan-ok">${ico("plus")}Adicionar</button></div></div>`
+      : `<button type="button" class="add-row" data-act="add-plan">${ico("plus")}Adicionar revisão</button>`}
+    <div class="err" id="nv-err"></div>
+    <button class="btn primary big" data-act="add-save">${ico("qr")}Salvar e gerar QR code</button>`);
+  $("#sheet-in").scrollTop = top;
+  if (a.adding) setTimeout(() => { const el = $("#np-name"); if (el) { el.focus(); el.scrollIntoView({block:"center"}); } }, 30);
+}
+function saveVehicle(){
+  const name = $("#nv-name").value.trim(); readAddForm();
+  const a = ui.add, t = a.type, D = DEFAULTS[t], err = $("#nv-err");
+  if (!name) { err.textContent = "Dê um nome ao veículo."; return; }
+  if (!a.plan.length) { err.textContent = "Adicione pelo menos uma revisão."; return; }
+  const counter = digits(a.counter) || 0;
+  const plan = a.plan.map(p => { const e = p.every || 100;
+    return {id:p.id, label:p.label, every:e, warn:Math.max(1, Math.round(e * .15)), last:counter, kind:p.kind || "check", unit:p.unit || ""}; });
+  const m = {id:`${t}-${pad(nextNum(t))}`, type:t, name, model:a.model.trim() || TYPES[t].label, ident:a.ident.trim() || "—",
+    unit: t === "cam" ? "km" : "h", base:counter, perDay:D.perDay, op:"Operador", plan, parts:D.parts.map(([k, l]) => [k, l, ""]), custom:true};
+  S.custom.push(m); applyCustom(); save(); renderAll();
+  openSheet("Veículo criado", `
+    <div class="created">${stickerHtml(m)}</div>
+    <div class="acts"><span class="chip ok">${ico("check")}Já aparece para o operador</span></div>
+    <div class="acts"><button class="btn" data-act="dl-sticker" data-mid="${m.id}" hidden>${ico("download")}Baixar etiqueta</button>
+      <button class="btn" data-act="copy-link" data-mid="${m.id}">${ico("link")}Copiar link</button></div>
+    <button class="btn primary big" data-act="open-op" data-mid="${m.id}">${ico("phone")}Ver no celular do operador</button>`);
+}
+function planForm(mid){
+  const m = mach(mid);
+  openSheet("Nova revisão · " + m.name, planFields(U(m)) + `<button class="btn primary big" data-act="plan-save" data-mid="${m.id}">${ico("plus")}Adicionar</button>`);
+  setTimeout(() => $("#np-name") && $("#np-name").focus(), 50);
+}
+function savePlanItem(mid){
+  const m = mach(mid), it = readPlanFields(U(m));
+  if (!it) return;
+  addPlanItem(m, it); closeSheet(); save(); renderAll(); toast("Revisão adicionada");
+}
+function itemForm(mid, kind){
+  const m = mach(mid), yn = tplOf(m, kind).mode === "yn", where = kind === "diario" ? "diário" : "checklist pré-safra";
+  openSheet(`Novo item no ${where}`, `<p class="muted" style="margin:0">${esc(m.name)}</p>
+    <div class="field"><label for="ni-name">Item</label><input id="ni-name" placeholder="${kind === "diario" ? "Ex.: Nível do combustível" : "Ex.: Pressão dos pneus"}"></div>
+    <div class="field"><span class="flabel">O que o operador informa</span><div class="kinds" role="radiogroup" aria-label="O que o operador informa">
+      <label><input type="radio" name="np-kind" value="check" checked><span>${yn ? "Sim / Não" : "OK / Problema"}</span></label>
+      <label><input type="radio" name="np-kind" value="num"><span>Número</span></label>
+      <label><input type="radio" name="np-kind" value="text"><span>Texto</span></label></div></div>
+    <div class="field" id="np-unit-wrap" hidden><label for="np-unit">Unidade</label><input id="np-unit" placeholder="psi, mm, %, litros"></div>
+    <div class="err" id="ni-err"></div>
+    <button class="btn primary big" data-act="item-save" data-mid="${m.id}" data-kind="${kind}">${ico("plus")}Adicionar ao ${kind === "diario" ? "diário" : "checklist"}</button>`);
+  setTimeout(() => $("#ni-name") && $("#ni-name").focus(), 50);
+}
+function saveItem(mid, kind){
+  const label = $("#ni-name").value.trim(), k = (document.querySelector('[name="np-kind"]:checked') || {}).value || "check";
+  if (!label) { $("#ni-err").textContent = "Dê um nome ao item."; return; }
+  const unit = k === "num" ? $("#np-unit").value.trim() : "";
+  S.extraItems = S.extraItems || {}; const e = S.extraItems[mid] = S.extraItems[mid] || {};
+  (e[kind] = e[kind] || []).push(["e" + Date.now().toString(36), label, "", k, unit]);
+  closeSheet(); save(); renderAll(); toast("Item adicionado. Já aparece para o operador.");
+}
+function updateCkProgress(){
+  const ck = ui.op.ck; if (!ck) return;
+  const items = itemsFor(mach(ck.mid), ck.kind), done = items.filter(i => ck.answers[i[0]]).length;
+  const c = document.querySelector(".o-count"); if (c) c.textContent = done + "/" + items.length;
+  const p = document.querySelector(".o-progress i"); if (p) p.style.width = Math.round(done / items.length * 100) + "%";
+  const b = document.querySelector('[data-act="submit-ck"]'); if (b) b.disabled = done < items.length;
+}
+function copyLink(btn, mid){
+  const url = qrText(mach(mid));
+  const fallback = () => { btn.outerHTML = `<input class="linkbox" readonly value="${esc(url)}" id="linkbox">`; const i = $("#linkbox"); i.focus(); i.select(); };
+  try { navigator.clipboard.writeText(url).then(() => toast("Link copiado"), fallback); } catch(e){ fallback(); }
+}
+
+/* ---------- sinal e envio ---------- */
+function sync(){
+  if (!ui.online || ui.syncing) return;
+  const pend = [...S.checklists, ...S.revisions].filter(r => !r.synced);
+  if (!pend.length) return;
+  ui.syncing = true; renderAll();
+  setTimeout(() => {
+    ui.syncing = false;
+    if (ui.online) { pend.forEach(r => r.synced = true); save(); toast(pend.length > 1 ? `${pend.length} registros enviados` : "Enviado"); }
+    renderAll();
+  }, 1200);
+}
+function setOnline(on, quiet){
+  if (ui.online === on) return;
+  ui.online = on; renderAll();
+  if (!quiet) toast(on ? "Sinal voltou" : "Sem sinal · o app continua funcionando");
+  if (on) sync();
+}
+function renderTop(){
+  $("#stage").dataset.view = ui.view;
+  $("#tab-op").setAttribute("aria-pressed", ui.view === "op");
+  $("#tab-panel").setAttribute("aria-pressed", ui.view === "panel");
+}
+function renderAll(){ renderTop(); renderOp(); renderPanel(); }
+function readPhoto(file){
+  return new Promise((res, rej) => { const fr = new FileReader();
+    fr.onload = () => { const img = new Image();
+      img.onload = () => { const s = Math.min(1, 480 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", .72)); };
+      img.onerror = rej; img.src = fr.result; };
+    fr.onerror = rej; fr.readAsDataURL(file); });
+}
+function submitCk(){
+  const ck = ui.op.ck, m = mach(ck.mid), cur = current(m, "device");
+  const v = parseInt(String(ck.counter).replace(/\D/g, ""), 10);
+  let err = "";
+  if (isNaN(v)) err = `Informe o ${counterName(m).toLowerCase()}.`;
+  else if (v < cur) err = `Menor que a última leitura (${fmt(cur)} ${U(m)}).`;
+  else if (v > cur + m.perDay * 30) err = `Muito acima da última leitura (${fmt(cur)} ${U(m)}).`;
+  if (err) { ui.op.err = err; renderOp(); $("#op").scrollTop = 0; window.scrollTo(0, 0); setTimeout(() => $("#ck-counter") && $("#ck-counter").focus(), 50); return; }
+  const rec = {id:uid("c"), mid:m.id, kind:ck.kind, tpl:ck.tpl, at:new Date().toISOString(), op:S.operator, counter:v, answers:JSON.parse(JSON.stringify(ck.answers)), synced:false};
+  extraOf(m.id, ck.kind).forEach(it => { const a = rec.answers[it[0]]; if (a) { a.label = it[1]; if (it[4]) a.unit = it[4]; } });
+  S.checklists.push(rec);
+  Object.assign(ui.op, {done:rec.id, ck:null, scr:"done", err:""});
+  save(); renderAll();
+  if (ui.online) sync();
+}
+function route(){
+  const h = decodeURIComponent(location.hash.slice(1)).toLowerCase(), m = mach(h);
+  if (m) { Object.assign(ui.op, {mid:m.id, scr:"machine"}); ui.view = "op"; }
+  else if (h === "dono") ui.view = "panel";
+}
+
+document.addEventListener("click", e => {
+  if (e.target.id === "sheet") return closeSheet();
+  const t = e.target.closest("[data-act]"); if (!t) return;
+  const a = t.dataset.act, d = t.dataset;
+  switch (a) {
+    case "view": ui.view = d.v; renderTop(); window.scrollTo(0, 0); break;
+    case "net": setOnline(!ui.online); break;
+    case "go": ui.op.scr = d.scr; ui.op.err = ""; renderOp(); break;
+    case "open-hist": closeSheet(); Object.assign(ui.op, {mid:d.mid, scr:"hist", err:""}); renderOp(); break;
+    case "open-m": closeSheet(); Object.assign(ui.op, {mid:d.mid, scr:"machine", err:""}); renderOp(); break;
+    case "start-ck": { const m = mach(ui.op.mid), tpl = d.kind === "oper" ? TYPES[m.type].oper : TYPES[m.type].daily;
+      ui.op.ck = {mid:m.id, kind:d.kind, tpl, counter:"", answers:{}}; ui.op.scr = "check"; ui.op.err = ""; renderOp(); break; }
+    case "ans": { const ck = ui.op.ck, prev = ck.answers[d.id] || {};
+      ck.answers[d.id] = (d.v === "warn" || d.v === "bad") ? {...prev, s:d.v} : {s:d.v}; renderOp();
+      if (d.v === "warn" || d.v === "bad") setTimeout(() => { const n = $("#n-" + d.id); if (n) n.focus({preventScroll:true}); }, 0);
+      break; }
+    case "submit-ck": submitCk(); break;
+    case "rev-form": revForm(d.mid, d.from); break;
+    case "rev-save": saveRev(d.mid, d.from); break;
+    case "ck-detail": ckDetail(d.cid); break;
+    case "p-open": closeSheet(); if (!ui.panel.mid) ui.panel.from = ui.panel.sec; ui.panel.mid = d.mid; ui.view = "panel"; renderTop(); renderPanel(); window.scrollTo(0, 0); break;
+    case "p-back": ui.panel.mid = null; ui.panel.sec = ui.panel.from || "machines"; renderPanel(); window.scrollTo(0, 0); break;
+    case "p-nav": closeSheet(); ui.panel.mid = null; ui.panel.sec = d.sec; renderPanel(); window.scrollTo(0, 0); break;
+    case "svc-filter": ui.panel.filter = d.v; renderPanel(); break;
+    case "ck-filter": ui.panel.ckf = d.v; renderPanel(); break;
+    case "item-add": itemForm(d.mid, d.kind); break;
+    case "item-save": saveItem(d.mid, d.kind); break;
+    case "item-rm": { const e = ((S.extraItems || {})[d.mid] || {})[d.kind]; if (e) { S.extraItems[d.mid][d.kind] = e.filter(i => i[0] !== d.id); save(); renderAll(); toast("Item removido"); } break; }
+    case "qr-all": qrAll(); break;
+    case "dl-sticker": downloadSticker(d.mid); break;
+    case "sheet-close": closeSheet(); break;
+    case "add-form": newVehicle("plt"); break;
+    case "add-type": readAddForm(); ui.add.type = d.v; ui.add.plan = defaultPlan(d.v); ui.add.adding = false; addForm(); break;
+    case "add-plan": readAddForm(); ui.add.adding = true; addForm(); break;
+    case "add-plan-cancel": readAddForm(); ui.add.adding = false; addForm(); break;
+    case "add-plan-ok": { const it = readPlanFields(ui.add.type === "cam" ? "km" : "h"); if (!it) break;
+      readAddForm(); ui.add.plan.push({id:"x" + Date.now().toString(36), ...it}); ui.add.adding = false; addForm(); break; }
+    case "add-rm": readAddForm(); ui.add.plan = ui.add.plan.filter(p => p.id !== d.id); addForm(); break;
+    case "plan-add": planForm(d.mid); break;
+    case "plan-save": savePlanItem(d.mid); break;
+    case "add-save": saveVehicle(); break;
+    case "copy-link": copyLink(t, d.mid); break;
+    case "open-op": closeSheet(); ui.view = "op"; Object.assign(ui.op, {mid:d.mid, scr:"machine", err:""}); renderAll(); window.scrollTo(0, 0); break;
+    case "reset":
+      if (!ui.resetArm) { ui.resetArm = true; renderPanel(); setTimeout(() => { ui.resetArm = false; renderPanel(); }, 4000); }
+      else { S = seed(); S.seededOn = new Date().toDateString(); applyCustom(); ui.resetArm = false; Object.assign(ui.op, {scr:"home", ck:null, done:null, err:""}); ui.panel.mid = null; save(); renderAll(); toast("Demonstração reiniciada"); }
+      break;
+  }
+});
+document.addEventListener("change", async e => {
+  const t = e.target;
+  if (t.name === "np-kind") { const w = $("#np-unit-wrap"); if (w) w.hidden = t.value !== "num"; return; }
+  if (t.dataset && t.dataset.photo && t.files && t.files[0]) {
+    try { const url = await readPhoto(t.files[0]); const ck = ui.op.ck; if (!ck) return; ck.answers[t.dataset.photo] = {...(ck.answers[t.dataset.photo] || {}), photo:url}; renderOp(); }
+    catch(err){ toast("Não consegui abrir essa foto."); }
+  }
+});
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.valCk && ui.op.ck) { const v = t.value.trim(), ck = ui.op.ck; if (v) ck.answers[t.dataset.valCk] = {s:"ok", val:v}; else delete ck.answers[t.dataset.valCk]; updateCkProgress(); }
+  else if (t.dataset && t.dataset.val) { const cb = document.querySelector(`[data-svc="${t.dataset.val}"]`); if (cb && t.value.trim()) cb.checked = true; }
+  else if (t.id === "ck-counter" && ui.op.ck) ui.op.ck.counter = t.value;
+  else if (t.dataset && t.dataset.note && ui.op.ck) { const ck = ui.op.ck; ck.answers[t.dataset.note] = {...(ck.answers[t.dataset.note] || {}), note:t.value}; }
+  else if (t.hasAttribute && t.hasAttribute("data-calc")) updateCalc();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#sheet").hidden) closeSheet(); });
+window.addEventListener("online", () => setOnline(true, true));
+window.addEventListener("offline", () => setOnline(false, true));
+window.addEventListener("hashchange", () => { route(); renderAll(); });
+
+/* ---------- início ---------- */
+S = load();
+if (!S || S.seededOn !== new Date().toDateString() || S.sv !== SEED_V) {
+  const old = S, keep = (old && old.custom) || [], ids = keep.map(m => m.id);
+  S = seed(); S.seededOn = new Date().toDateString(); S.custom = keep; S.extraPlan = (old && old.extraPlan) || {}; S.extraItems = (old && old.extraItems) || {};
+  if (old) S.revisions.push(...old.revisions.filter(r => ids.includes(r.mid)));
+}
+S.custom = S.custom || [];
+applyCustom();
+ui.online = navigator.onLine !== false;
+route(); renderAll(); save();
+(async () => { try { if (window.claude && window.claude.use) { downloadsApi = await window.claude.use("downloads"); if (downloadsApi) renderPanel(); } } catch(e){} })();
+</script>
+
+<script>
+/* funciona sem internet: guarda o app no aparelho depois do primeiro acesso */
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
